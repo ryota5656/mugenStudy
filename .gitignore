@@ -1,7 +1,7 @@
 
 .DS_Store
-.env
-Production.xcconfig
+Res/
+Config/
 
 xcuserdata/
 
@@ -46,4 +46,4 @@ fastlane/test_output
 iOSInjectionProject/
 
 # Firebase config
-GoogleService-Info.plist
+mugenStudy.xcodeproj/Config/GoogleService-Info.plist
