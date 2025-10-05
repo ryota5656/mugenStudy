@@ -1,7 +1,7 @@
 
 .DS_Store
-mugenStudy.xcodeproj/Res/
-mugenStudy.xcodeproj/Config/*.xcconfig
+Res/
+Config/*.xcconfig
 
 xcuserdata/
 
