@@ -4,10 +4,38 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>mugenStudy.xcscheme_^#shared#^_</key>
+		<key>GettingStarted (Playground).xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>Promises (Playground).xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+		<key>mugenStudy.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>4BD755C72E69E6C300DE6BE1</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4BD755D42E69E6C500DE6BE1</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>4BD755DE2E69E6C500DE6BE1</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

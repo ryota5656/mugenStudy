@@ -7,7 +7,7 @@
 
 import XCTest
 
-final class mugenStudyUITestsLaunchTests: XCTestCase {
+final class MugenStudyUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

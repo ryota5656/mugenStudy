@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4B803FDA2E884E4C007F1BE1 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4B803FD92E884E4C007F1BE1 /* FirebaseAuth */; };
+		4B803FDC2E884E4C007F1BE1 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 4B803FDB2E884E4C007F1BE1 /* FirebaseCore */; };
+		4B803FDE2E884E4C007F1BE1 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 4B803FDD2E884E4C007F1BE1 /* FirebaseDatabase */; };
+		4B803FE02E884E4C007F1BE1 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 4B803FDF2E884E4C007F1BE1 /* FirebaseFirestore */; };
+		4B803FE22E884E4C007F1BE1 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 4B803FE12E884E4C007F1BE1 /* FirebaseStorage */; };
+		4B8D5B762E8C0F8600DD6D0A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4B8D5B752E8C0F8600DD6D0A /* RealmSwift */; };
+		4B8D5BBF2E8C4AA100DD6D0A /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 4B8D5B752E8C0F8600DD6D0A /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4BD755D62E69E6C500DE6BE1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -23,15 +33,42 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		4B8D5BC02E8C4AA100DD6D0A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4B8D5BBF2E8C4AA100DD6D0A /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		4BD755C82E69E6C300DE6BE1 /* mugenStudy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mugenStudy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BD755D52E69E6C500DE6BE1 /* mugenStudyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = mugenStudyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BD755DF2E69E6C500DE6BE1 /* mugenStudyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = mugenStudyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		4B8D5C0A2E92302000DD6D0A /* Exceptions for "mugenStudy" folder in "mugenStudy" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4BD755C72E69E6C300DE6BE1 /* mugenStudy */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4BD755CA2E69E6C300DE6BE1 /* mugenStudy */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4B8D5C0A2E92302000DD6D0A /* Exceptions for "mugenStudy" folder in "mugenStudy" target */,
+			);
 			path = mugenStudy;
 			sourceTree = "<group>";
 		};
@@ -52,6 +89,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B803FDE2E884E4C007F1BE1 /* FirebaseDatabase in Frameworks */,
+				4B8D5B762E8C0F8600DD6D0A /* RealmSwift in Frameworks */,
+				4B803FE02E884E4C007F1BE1 /* FirebaseFirestore in Frameworks */,
+				4B803FDC2E884E4C007F1BE1 /* FirebaseCore in Frameworks */,
+				4B803FE22E884E4C007F1BE1 /* FirebaseStorage in Frameworks */,
+				4B803FDA2E884E4C007F1BE1 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,6 +145,7 @@
 				4BD755C42E69E6C300DE6BE1 /* Sources */,
 				4BD755C52E69E6C300DE6BE1 /* Frameworks */,
 				4BD755C62E69E6C300DE6BE1 /* Resources */,
+				4B8D5BC02E8C4AA100DD6D0A /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -112,6 +156,12 @@
 			);
 			name = mugenStudy;
 			packageProductDependencies = (
+				4B803FD92E884E4C007F1BE1 /* FirebaseAuth */,
+				4B803FDB2E884E4C007F1BE1 /* FirebaseCore */,
+				4B803FDD2E884E4C007F1BE1 /* FirebaseDatabase */,
+				4B803FDF2E884E4C007F1BE1 /* FirebaseFirestore */,
+				4B803FE12E884E4C007F1BE1 /* FirebaseStorage */,
+				4B8D5B752E8C0F8600DD6D0A /* RealmSwift */,
 			);
 			productName = mugenStudy;
 			productReference = 4BD755C82E69E6C300DE6BE1 /* mugenStudy.app */;
@@ -195,6 +245,10 @@
 			);
 			mainGroup = 4BD755BF2E69E6C300DE6BE1;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4B803FD82E884E4C007F1BE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				4B8D5B722E8C0F8600DD6D0A /* XCRemoteSwiftPackageReference "realm-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4BD755C92E69E6C300DE6BE1 /* Products */;
 			projectDirPath = "";
@@ -387,6 +441,8 @@
 		};
 		4BD755EA2E69E6C500DE6BE1 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 4BD755CA2E69E6C300DE6BE1 /* mugenStudy */;
+			baseConfigurationReferenceRelativePath = Config/Production.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -398,6 +454,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = mugenStudy/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -431,6 +488,8 @@
 		};
 		4BD755EB2E69E6C500DE6BE1 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 4BD755CA2E69E6C300DE6BE1 /* mugenStudy */;
+			baseConfigurationReferenceRelativePath = Config/Production.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -442,6 +501,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = mugenStudy/Info.plist;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -615,6 +675,58 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4B803FD82E884E4C007F1BE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.3.0;
+			};
+		};
+		4B8D5B722E8C0F8600DD6D0A /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4B803FD92E884E4C007F1BE1 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B803FD82E884E4C007F1BE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		4B803FDB2E884E4C007F1BE1 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B803FD82E884E4C007F1BE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		4B803FDD2E884E4C007F1BE1 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B803FD82E884E4C007F1BE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		4B803FDF2E884E4C007F1BE1 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B803FD82E884E4C007F1BE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		4B803FE12E884E4C007F1BE1 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B803FD82E884E4C007F1BE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		4B8D5B752E8C0F8600DD6D0A /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B8D5B722E8C0F8600DD6D0A /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4BD755C02E69E6C300DE6BE1 /* Project object */;
 }
