@@ -1,8 +1,8 @@
 import SwiftUI
 import FirebaseFirestore
 
-struct SavedQuestionsView: View {
-    @StateObject private var viewModel = SavedQuestionsViewModel()
+struct SavedQuestionListView: View {
+    @StateObject private var viewModel = SavedQuestionListViewModel()
 
     var body: some View {
         List {
@@ -16,7 +16,13 @@ struct SavedQuestionsView: View {
                     .foregroundColor(.secondary)
             } else {
                 ForEach(viewModel.items) { item in
-                    NavigationLink(destination: SinglePracticeView(question: item, viewModel: viewModel)) {
+                    NavigationLink(
+                        destination:SinglePracticeView(
+                            question: item,
+                            onSelect: { isCorrect,selectIndex in
+                                viewModel.selectChoice(index: item.id, isCorrect: isCorrect)
+                            })
+                    ) {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(item.type.displayName)
                                 .font(.caption)
@@ -66,51 +72,3 @@ struct SavedQuestionsView: View {
     }
 }
 
-struct SinglePracticeView: View {
-    let question: ToeicQuestion
-    @State private var selected: Int? = nil
-    @State private var showExplanation: Bool = false
-    @ObservedObject var viewModel: SavedQuestionsViewModel
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                Text(question.prompt)
-                    .font(.title3)
-                ForEach(Array(question.choices.enumerated()), id: \.offset) { idx, choice in
-                    Button(action: {
-                        selected = idx
-                        showExplanation = true
-                        let isCorrect = (idx == question.answerIndex)
-                        viewModel.selectChoice(index: question.id, isCorrect: isCorrect)
-                    }) {
-                        HStack(alignment: .top) {
-                            Text(String(UnicodeScalar(65 + idx)!)).bold()
-                            Text(choice).multilineTextAlignment(.leading)
-                            Spacer()
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(showExplanation)
-                }
-
-                if showExplanation, let s = selected {
-                    let isCorrect = (s == question.answerIndex)
-                    HStack(spacing: 8) {
-                        Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundColor(isCorrect ? .green : .red)
-                        Text(isCorrect ? "正解！" : "不正解").bold()
-                    }
-                    if !question.explanation.isEmpty {
-                        Text("解説: \(question.explanation)")
-                            .padding(.top, 4)
-                    }
-                    if let filled = question.filledSentence { Text("英文: \(filled)") }
-                    if let ja = question.filledSentenceJa { Text("日本語訳: \(ja)") }
-                }
-            }
-            .padding()
-        }
-        .navigationTitle("単問演習")
-    }
-}

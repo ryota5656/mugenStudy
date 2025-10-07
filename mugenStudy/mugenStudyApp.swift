@@ -56,7 +56,7 @@ struct MugenStudyApp: SwiftUI.App {
                     .tabItem {
                         Label("出題", systemImage: "doc.text.magnifyingglass")
                     }
-                NavigationView { SavedQuestionsView() }
+                NavigationView { SavedQuestionListView() }
                     .tabItem {
                         Label("保存", systemImage: "tray.full")
                     }
