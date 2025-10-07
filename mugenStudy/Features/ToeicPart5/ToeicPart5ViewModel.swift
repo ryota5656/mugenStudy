@@ -2,6 +2,7 @@
 
 import Foundation
 internal import Combine
+import SwiftUI
 
 @MainActor
 final class ToeicPart5ViewModel: ObservableObject {
@@ -9,6 +10,7 @@ final class ToeicPart5ViewModel: ObservableObject {
     @Published var selectedTypes: Set<QuestionType> = [.grammar, .partOfSpeech, .vocabulary]
     @Published var isLoading: Bool = false
     @Published var questions: [ToeicQuestion] = []
+    @Published var displayChoice: [String] = []
     @Published var currentIndex: Int = 0
     @Published var selectedChoiceIndex: Int? = nil
     @Published var showExplanation: Bool = false
@@ -17,6 +19,7 @@ final class ToeicPart5ViewModel: ObservableObject {
     private let service: GroqToeicService
     private let firebase: FirebaseService
     private let answerStore: AnswerHistoryStoring
+    private var answer: String = ""
     
     init(firebase: FirebaseService = FirebaseService(), answerStore: AnswerHistoryStoring = AnswerHistoryStoreFactory.makeDefault()) {
         let infoPlistKey = Bundle.main.object(forInfoDictionaryKey: "GROQ_API_KEY_1") as? String
@@ -26,7 +29,7 @@ final class ToeicPart5ViewModel: ObservableObject {
         self.firebase = firebase
         self.answerStore = answerStore
         if apiKey.isEmpty {
-            self.errorMessage = "GROQ_API_KEY_1 が未設定です。Info.plist または環境変数に設定してください。"
+            self.errorMessage = "GROQが未設定です。Info.plist または環境変数に設定してください。"
         }
     }
     
@@ -50,7 +53,7 @@ final class ToeicPart5ViewModel: ObservableObject {
         showExplanation = false
         defer { isLoading = false }
         // 15件を作成。typeは選択済みカテゴリで均等配分し、要素はローダーからランダムに取得
-        let total = 15
+        let total = 10
         let typePool = Array(selectedTypes) // Set -> Array
         // 均等配分（できる限り均等に割り振り、余りは先頭から）
         var counts: [QuestionType: Int] = [:]
@@ -84,8 +87,8 @@ final class ToeicPart5ViewModel: ObservableObject {
             let sceneText = "\(scene?.labelJa)に関する\(scene?.scene)のシーンです"
 
             // grammar/vocabulary の場合のみ付加情報をセット
-            let grammarSub: String? = (t == .grammar) ? GrammarLoader.randomSubcategory() : nil
-            let vocabEntry = (t == .vocabulary) ? WordsLoader.randomWord(level: levelExact, pos: nil) : nil
+            let grammarSub: String? = (t == .grammar) ? (CEFRGrammarLoader.randomTopic(for: selectedLevel) ?? GrammarLoader.randomSubcategory()) : nil
+            let vocabEntry = (t == .vocabulary) ? ScoreWordsLoader.randomWord(approxScore: levelExact) : nil
             let vocab: ItemPlan.Vocab? = vocabEntry.map { ItemPlan.Vocab(headword: $0.word, meaning: $0.meaning, pos: $0.pos) }
 
             plans.append(.init(index: i + 1,
@@ -94,21 +97,67 @@ final class ToeicPart5ViewModel: ObservableObject {
                                grammarSubcategory: grammarSub,
                                vocab: vocab))
         }
-        print(plans)
         
+//                questions = []
+//                currentIndex = 0
+//                selectedChoiceIndex = nil
+//                showExplanation = false
+//                questions = [ToeicQuestion(id: UUID(), type: .grammar, prompt: "testPrompt", choices: ["a", "b", "c", "e"], answerIndex: 0)]
+//                questions.append(contentsOf: [
+//                    ToeicQuestion(id: UUID(), type: .grammar, prompt: "testPrompt2", choices: ["a", "b", "c", "e"], answerIndex: 0)
+//                ])
+//                questions.append(contentsOf: [
+//                    ToeicQuestion(id: UUID(), type: .grammar, prompt: "testPrompt3", choices: ["a", "b", "c", "e"], answerIndex: 0)
+//                ])
+//                questions.append(contentsOf: [
+//                    ToeicQuestion(id: UUID(), type: .grammar, prompt: "testPrompt4", choices: ["a", "b", "c", "e"], answerIndex: 0)
+//                ])
+//                questions.append(contentsOf: [
+//                    ToeicQuestion(id: UUID(), type: .grammar, prompt: "testPrompt5", choices: ["a", "b", "c", "e"], answerIndex: 0)
+//                ])
+//                questions.append(contentsOf: [
+//                    ToeicQuestion(id: UUID(), type: .grammar, prompt: "testPrompt6", choices: ["a", "b", "c", "e"], answerIndex: 0)
+//                ])
+//                questions.append(contentsOf: [
+//                    ToeicQuestion(id: UUID(), type: .grammar, prompt: "testPrompt7", choices: ["a", "b", "c", "e"], answerIndex: 0)
+//                ])
+//                return
+                
         do {
             let items = try await service.generateQuestions(with: plans, level: selectedLevel, types: Array(selectedTypes))
             await MainActor.run {
                 self.questions = items
             }
-            print(items)
-            // Firebaseへ保存（任意設定時）
-
-            do {
-                try await firebase.saveQuestions(collection: "toeic_part5_items", items: items, level: levelExact)
-            } catch {
-                self.errorMessage = "Firebase保存に失敗しました: \(error.localizedDescription)"
+            // Debug print choices for each question
+            for (idx, q) in items.enumerated() {
+                print("index #\(idx)")
+                print("plans type #\(plans[idx].type)")
+                print("item type #\(q.type)")
+                print("plans grammarSubcategory #\(plans[idx].grammarSubcategory)")
+                print("plans sceneText #\(plans[idx].sceneText)")
+                print("plans vocab #\(plans[idx].vocab)")
+                print("item vocab #\(q.choices[0])")
+                
+                print("item prompt #\(q.prompt)")
+                if let translations = q.choiceTranslationsJa {
+                    for (cidx, choice) in translations.enumerated() {
+                        print("item  Choice #\(cidx + 1) (JA): \(choice)")
+                    }
+                }
+                
+                print("item prompt #\(q.prompt)")
+                let translations = q.choices
+                for (cidx, choice) in translations.enumerated() {
+                    print("#\(cidx + 1) : \(choice)")
+                }
+                print("item filledSentenceJa #\(q.filledSentenceJa)")
             }
+            
+//            do {
+//                try await firebase.saveQuestions(collection: "toeic_part5_items", items: items, level: levelExact)
+//            } catch {
+//                self.errorMessage = "Firebase保存に失敗しました: \(error.localizedDescription)"
+//            }
             
         } catch {
             self.errorMessage = "問題の取得に失敗しました: \(error.localizedDescription)"

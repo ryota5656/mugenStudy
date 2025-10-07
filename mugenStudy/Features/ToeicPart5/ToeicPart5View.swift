@@ -67,12 +67,23 @@ struct ToeicPart5View: View {
             } else if viewModel.isLoading {
                 ProgressView("生成中…")
             } else if let q = viewModel.currentQuestion {
-                questionView(q)
+                SinglePracticeView(
+                    question: q,
+                    onSelect: {isCorrect,selectIndex in
+                        viewModel.selectChoice(selectIndex)
+                    })
+                Button(action: { viewModel.goNext() }) {
+                    Text(viewModel.isLastQuestion ? "終了" : "次へ")
+                }
+                .buttonStyle(.borderedProminent)
             } else {
                 Text("上のボタンから問題を生成してください")
             }
         }
     }
+    
+    
+    
     
     @ViewBuilder
     private func questionView(_ q: ToeicQuestion) -> some View {
@@ -130,10 +141,6 @@ struct ToeicPart5View: View {
                     Text("選択肢\(String(UnicodeScalar(65 + idx)!))：「\(choice)」")
                         .font(.body)
                         .padding(.top, 4)
-                }
-
-                Button(action: { viewModel.goNext() }) {
-                    Text(viewModel.isLastQuestion ? "終了" : "次へ")
                 }
                 .buttonStyle(.borderedProminent)
             }

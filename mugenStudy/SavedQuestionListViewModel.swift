@@ -2,7 +2,7 @@ import Foundation
 internal import Combine
 import FirebaseFirestore
 
-final class SavedQuestionsViewModel: ObservableObject {
+final class SavedQuestionListViewModel: ObservableObject {
     @Published private(set) var items: [ToeicQuestion] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil

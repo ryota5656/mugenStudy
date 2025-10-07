@@ -195,7 +195,6 @@ struct PlanForPrompt: Encodable {
     struct SceneInfo: Encodable { let text: String }
     let index: Int
     let type: String
-    let levelHint: String?
     let scene: SceneInfo
     let grammar: String?
     let vocab: String?

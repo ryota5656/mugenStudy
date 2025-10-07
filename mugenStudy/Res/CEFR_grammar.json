@@ -1,0 +1,93 @@
+{
+  "grammar_by_cefr": [
+    {
+      "level": "A1",
+      "topics": [
+        "Be動詞（am, is, are）",
+        "一般動詞の現在形",
+        "疑問文・否定文（Do/Does）",
+        "代名詞（I, you, he, she, it, we, they）",
+        "冠詞（a, an, the）",
+        "名詞の複数形",
+        "形容詞と名詞の語順（a big house）",
+        "There is / There are",
+        "場所の前置詞（in, on, at）",
+        "時間の表現（today, now, every day）",
+        "命令文（Sit down!）",
+        "Can（能力・許可）",
+        "現在進行形（am/is/are + -ing）",
+        "簡単な過去形（was, were, wentなど）"
+      ]
+    },
+    {
+      "level": "A2",
+      "topics": [
+        "過去形（規則動詞・不規則動詞）",
+        "未来表現（will, be going to）",
+        "比較級・最上級（bigger, the biggest）",
+        "目的語の使い方（give me the book）",
+        "副詞の位置と使い方（always, often, usually）",
+        "助動詞（must, have to, should）",
+        "不定詞（to + 動詞）",
+        "動名詞（動詞 + ing）",
+        "疑問詞（what, where, who, when, why, how）",
+        "代名詞の目的格・所有格（him, her, my, your）",
+        "現在進行形と過去進行形の区別",
+        "簡単な接続詞（and, but, because, so）",
+        "過去の習慣（used to）"
+      ]
+    },
+    {
+      "level": "B1",
+      "topics": [
+        "現在完了形（have/has + 過去分詞）",
+        "現在完了進行形",
+        "受動態（be + 過去分詞）",
+        "関係代名詞（who, which, that）",
+        "不定詞と動名詞の使い分け",
+        "仮定法（if節：現在・未来の仮定）",
+        "過去進行形・過去完了形",
+        "副詞節・名詞節（when, because, if, thatなど）",
+        "比較構文（as ... as, less ... than）",
+        "助動詞のニュアンス（might, could, must haveなど）",
+        "間接話法（He said that ...）",
+        "目的語＋不定詞（want him to go）",
+        "文の強調・倒置（So do I, Neither do I）"
+      ]
+    },
+    {
+      "level": "B2",
+      "topics": [
+        "仮定法過去・仮定法過去完了（If I were, If I had）",
+        "分詞構文（Having finished, I went out.）",
+        "関係副詞（where, when, why）",
+        "省略・強調構文（What I want is..., It is ... that ...）",
+        "不定詞・動名詞の慣用表現（be used to, look forward to）",
+        "受動態の発展形（It is said that..., be thought to）",
+        "複合時制（will have doneなど）",
+        "接続副詞（however, therefore, moreover）",
+        "前置詞句の名詞化・抽象表現（in terms of, with regard to）",
+        "使役動詞（make, have, let, get）",
+        "倒置（Never have I seen such a thing.）",
+        "比較表現の発展（The more..., the more...）"
+      ]
+    },
+    {
+      "level": "C1",
+      "topics": [
+        "仮定法の発展形（should + 原形, were to）",
+        "倒置を用いた強調（Had I known..., Should you need...）",
+        "分詞構文の応用（Given that..., Considering...）",
+        "名詞節構文（What matters is..., The fact that...）",
+        "関係節の非制限用法（which以下の補足説明）",
+        "過去分詞・動名詞を使った抽象構文（Having been told..., Being aware of...）",
+        "同格構文（the idea that..., the fact that...）",
+        "省略構文（if necessary, when possible）",
+        "間接話法・仮定・推量の多様表現（He might have been..., He would have gone...）",
+        "複雑な接続詞（in spite of, provided that, as though）",
+        "強調構文・文のリズム調整（Not only ... but also..., What’s more ...）",
+        "フォーマルな助動詞表現（ought to, shall, would rather）"
+      ]
+    }
+  ]
+}
