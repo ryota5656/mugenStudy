@@ -59,46 +59,46 @@ final class SavedQuestionListViewModel: ObservableObject {
         }
 
         // Phase 2: サーバーから差分のみ取得してマージ
-        let maxUpdatedAt: Date? = items.map { $0.updatedAt }.max()
-        let effectiveFrom: Date? = {
-            switch (dateFrom, maxUpdatedAt) {
-            case (nil, nil): return nil
-            case (let a?, nil): return a
-            case (nil, let b?): return b
-            case (let a?, let b?): return max(a, b)
-            }
-        }()
-
-        if effectiveFrom != nil {
-            do {
-                let delta = try await firebase.fetchQuestionsPage(
-                    collection: "toeic_part5_items",
-                    type: selectedType,
-                    from: effectiveFrom,
-                    to: dateTo,
-                    pageSize: 20,
-                    startAfter: nil
-                )
-                await MainActor.run {
-                    if !delta.items.isEmpty {
-                        let combined = delta.items + self.items
-                        var seen: Set<UUID> = []
-                        let deduped: [ToeicQuestion] = combined.filter { q in
-                            if seen.contains(q.id) { return false }
-                            seen.insert(q.id)
-                            return true
-                        }
-                        self.items = deduped.sorted { $0.updatedAt > $1.updatedAt }
-                        // lastSnapshot はキャッシュ側のものを維持
-                    }
-                }
-            } catch {
-                // 差分取得失敗は黙ってスキップ（キャッシュ表示は維持）
-            }
-        } else {
-            // キャッシュが空などの場合は通常の1ページを取得
-            await loadMore()
-        }
+//        let maxUpdatedAt: Date? = items.map { $0.updatedAt }.max()
+//        let effectiveFrom: Date? = {
+//            switch (dateFrom, maxUpdatedAt) {
+//            case (nil, nil): return nil
+//            case (let a?, nil): return a
+//            case (nil, let b?): return b
+//            case (let a?, let b?): return max(a, b)
+//            }
+//        }()
+//
+//        if effectiveFrom != nil {
+//            do {
+//                let delta = try await firebase.fetchQuestionsPage(
+//                    collection: "toeic_part5_items",
+//                    type: selectedType,
+//                    from: effectiveFrom,
+//                    to: dateTo,
+//                    pageSize: 20,
+//                    startAfter: nil
+//                )
+//                await MainActor.run {
+//                    if !delta.items.isEmpty {
+//                        let combined = delta.items + self.items
+//                        var seen: Set<UUID> = []
+//                        let deduped: [ToeicQuestion] = combined.filter { q in
+//                            if seen.contains(q.id) { return false }
+//                            seen.insert(q.id)
+//                            return true
+//                        }
+//                        self.items = deduped.sorted { $0.updatedAt > $1.updatedAt }
+//                        // lastSnapshot はキャッシュ側のものを維持
+//                    }
+//                }
+//            } catch {
+//                // 差分取得失敗は黙ってスキップ（キャッシュ表示は維持）
+//            }
+//        } else {
+//            // キャッシュが空などの場合は通常の1ページを取得
+//            await loadMore()
+//        }
 
         await MainActor.run { self.isLoading = false }
     }
@@ -111,7 +111,8 @@ final class SavedQuestionListViewModel: ObservableObject {
                 from: dateFrom,
                 to: dateTo,
                 pageSize: 20,
-                startAfter: lastSnapshot
+                startAfter: lastSnapshot,
+                source: .cache
             )
             await MainActor.run {
                 if !page.items.isEmpty {

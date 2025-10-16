@@ -90,11 +90,11 @@ enum QuestionType: String, Codable, CaseIterable, Identifiable {
 }
 
 enum ToeicLevel: String, CaseIterable, Identifiable {
-    case l200 = "~200"
-    case l400 = "201-400"
-    case l600 = "401-600"
-    case l800 = "601-800"
-    case l990 = "801-990"
+    case l200 = "-350"
+    case l400 = "-550"
+    case l600 = "-750"
+    case l800 = "-850"
+    case l990 = "-990"
     
     var id: String { rawValue }
     var displayName: String { rawValue }
@@ -125,17 +125,20 @@ struct ItemPlan {
     let sceneText: String
     let grammarSubcategory: String?
     let vocab: Vocab?
+    let pos: String?
 
     init(index: Int,
          type: QuestionType,
          sceneText: String,
          grammarSubcategory: String? = nil,
-         vocab: Vocab? = nil) {
+         vocab: Vocab? = nil,
+         pos: String? = nil) {
         self.index = index
         self.type = type
         self.sceneText = sceneText
         self.grammarSubcategory = grammarSubcategory
         self.vocab = vocab
+        self.pos = pos
     }
 }
 
@@ -198,6 +201,7 @@ struct PlanForPrompt: Encodable {
     let scene: SceneInfo
     let grammar: String?
     let vocab: String?
+    let pos: String?
 }
 
 struct VerifyPayload: Encodable {

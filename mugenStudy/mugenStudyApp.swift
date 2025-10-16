@@ -19,6 +19,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     let settings = FirestoreSettings()
     settings.isPersistenceEnabled = true
     Firestore.firestore().settings = settings
+      //キャッシュ削除
+//    Firestore.firestore().clearPersistence()
 
     // Realm migration: bump schema when AnswerHistoryObject fields changed
     let realmConfig = Realm.Configuration(

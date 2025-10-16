@@ -49,7 +49,8 @@ struct ToeicPart5View: View {
             }
             
             Button(action: {
-                Task { await viewModel.fetchQuestions2() }
+//                Task { await viewModel.fetchQuestions() }
+                Task { await viewModel.checklatestQuestion() }
             }) {
                 HStack {
                     if viewModel.isLoading { ProgressView() }

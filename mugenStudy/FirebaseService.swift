@@ -46,7 +46,7 @@ final class FirebaseService {
 
     // 保存済み問題の取得（createdAt 降順）
     func fetchQuestions(collection: String, limit: Int? = nil, source: FirestoreSource = .default) async throws -> [ToeicQuestion] {
-        var query: Query = db.collection(collection).order(by: "createdAt", descending: true)
+        var query: Query = db.collection(collection).order(by: "updatedAt", descending: true)
         if let limit = limit { query = query.limit(to: limit) }
         let snapshot: QuerySnapshot
         switch source {
@@ -75,6 +75,7 @@ final class FirebaseService {
         type: QuestionType? = nil,
         from: Date? = nil,
         to: Date? = nil,
+        descending: Bool = true,
         pageSize: Int = 20,
         startAfter: DocumentSnapshot? = nil,
         source: FirestoreSource = .default
@@ -83,7 +84,7 @@ final class FirebaseService {
         if let t = type { q = q.whereField("type", isEqualTo: t.rawValue) }
         if let from = from { q = q.whereField("updatedAt", isGreaterThan: from) }
         if let to = to { q = q.whereField("updatedAt", isLessThanOrEqualTo: to) }
-        q = q.order(by: "updatedAt", descending: true).limit(to: pageSize)
+        q = q.order(by: "updatedAt", descending: descending).limit(to: pageSize)
         if let cursor = startAfter { q = q.start(afterDocument: cursor) }
 
         let snapshot: QuerySnapshot
@@ -105,6 +106,15 @@ final class FirebaseService {
             }
         }
         return (items, snapshot.documents.last)
+    }
+    
+    // 指定日時より後のドキュメントが10件以上存在するか
+    func existsNewerThan(collection: String, since date: Date, source: FirestoreSource = .server) async throws -> Bool {
+        let q = db.collection(collection)
+            .whereField("updatedAt", isGreaterThan: date)
+            .limit(to: 10)
+        let snapshot = try await q.getDocuments(source: source)
+        return snapshot.count >= 10
     }
 }
 

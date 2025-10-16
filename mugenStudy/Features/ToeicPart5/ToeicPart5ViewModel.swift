@@ -3,6 +3,7 @@
 import Foundation
 internal import Combine
 import SwiftUI
+import FirebaseFirestore
 
 @MainActor
 final class ToeicPart5ViewModel: ObservableObject {
@@ -40,7 +41,33 @@ final class ToeicPart5ViewModel: ObservableObject {
     
     var isLastQuestion: Bool { currentIndex == max(questions.count - 1, 0) }
     
-    func fetchQuestions2() async {
+    func checklatestQuestion() async {
+        
+        // firebaseの最新日を確認
+        Task {
+            do {
+                let item = try await firebase.fetchQuestions(collection: "toeic_part5_items", limit: 1, source: .cache)
+                if item.isEmpty {
+                    questions = try await firebase.fetchQuestionsPage(collection: "toeic_part5_items", descending: false, pageSize: 10).items
+                    return
+                }
+                let check = try await firebase.existsNewerThan(collection: "toeic_part5_items", since: item[0].updatedAt)
+                if check {
+                    questions = try await firebase.fetchQuestionsPage(collection: "toeic_part5_items",from: item[0].updatedAt, descending: false, pageSize: 10).items
+                } else {
+                    await fetchQuestions()
+                }
+            } catch {
+                
+            }
+        }
+        // firebaseの最新日よりサーバーの最新日が前だったらfirebaseから取得
+        
+        // firebaseの最新日とサーバーが最新日が同じだったらai生成
+        
+    }
+    
+    func fetchQuestions() async {
         guard !selectedTypes.isEmpty else {
             self.errorMessage = "出題カテゴリを1つ以上選択してください"
             return
@@ -84,18 +111,39 @@ final class ToeicPart5ViewModel: ObservableObject {
             let t: QuestionType = (i < typesForPlans.count) ? typesForPlans[i] : (typePool.randomElement() ?? .grammar)
             // シーンはランダム
             let scene = ScenesLoader.randomLabelAndScene()
-            let sceneText = "\(scene?.labelJa)に関する\(scene?.scene)のシーンです"
+            let sceneText = "\(scene?.labelJa ?? "")に関する\(scene?.scene ?? "")のシーンです"
 
             // grammar/vocabulary の場合のみ付加情報をセット
             let grammarSub: String? = (t == .grammar) ? (CEFRGrammarLoader.randomTopic(for: selectedLevel) ?? GrammarLoader.randomSubcategory()) : nil
             let vocabEntry = (t == .vocabulary) ? ScoreWordsLoader.randomWord(approxScore: levelExact) : nil
             let vocab: ItemPlan.Vocab? = vocabEntry.map { ItemPlan.Vocab(headword: $0.word, meaning: $0.meaning, pos: $0.pos) }
+            // partOfSpeech の場合は指定品詞をランダム選択
+            let posLabel: String? = {
+                guard t == .partOfSpeech else { return nil }
+                let posOptions: [(ja: String, en: String)] = [
+                    ("名詞", "noun"),
+                    ("動詞", "verb"),
+                    ("形容詞", "adjective"),
+                    ("副詞", "adverb"),
+                    ("前置詞", "preposition"),
+                    ("接続詞", "conjunction"),
+                    ("動詞形", "verb form"),
+                    ("代名詞", "pronoun"),
+                    ("冠詞", "article"),
+                    ("関係詞", "relative pronoun")
+                ]
+                if let pick = posOptions.randomElement() {
+                    return "\(pick.ja) (\(pick.en))"
+                }
+                return nil
+            }()
 
             plans.append(.init(index: i + 1,
                                type: t,
                                sceneText: sceneText,
                                grammarSubcategory: grammarSub,
-                               vocab: vocab))
+                               vocab: vocab,
+                               pos: posLabel))
         }
         
 //                questions = []
@@ -127,37 +175,20 @@ final class ToeicPart5ViewModel: ObservableObject {
             let items = try await service.generateQuestions(with: plans, level: selectedLevel, types: Array(selectedTypes))
             await MainActor.run {
                 self.questions = items
-            }
-            // Debug print choices for each question
-            for (idx, q) in items.enumerated() {
-                print("index #\(idx)")
-                print("plans type #\(plans[idx].type)")
-                print("item type #\(q.type)")
-                print("plans grammarSubcategory #\(plans[idx].grammarSubcategory)")
-                print("plans sceneText #\(plans[idx].sceneText)")
-                print("plans vocab #\(plans[idx].vocab)")
-                print("item vocab #\(q.choices[0])")
-                
-                print("item prompt #\(q.prompt)")
-                if let translations = q.choiceTranslationsJa {
-                    for (cidx, choice) in translations.enumerated() {
-                        print("item  Choice #\(cidx + 1) (JA): \(choice)")
+                for item in items {
+                    print(item.prompt)
+                    for (idx, choice) in item.choices.enumerated() {
+                        print("#\(idx): \(choice)")
                     }
                 }
-                
-                print("item prompt #\(q.prompt)")
-                let translations = q.choices
-                for (cidx, choice) in translations.enumerated() {
-                    print("#\(cidx + 1) : \(choice)")
-                }
-                print("item filledSentenceJa #\(q.filledSentenceJa)")
+                print(items)
             }
             
-//            do {
-//                try await firebase.saveQuestions(collection: "toeic_part5_items", items: items, level: levelExact)
-//            } catch {
-//                self.errorMessage = "Firebase保存に失敗しました: \(error.localizedDescription)"
-//            }
+            do {
+                try await firebase.saveQuestions(collection: "toeic_part5_items", items: items, level: levelExact)
+            } catch {
+                self.errorMessage = "Firebase保存に失敗しました: \(error.localizedDescription)"
+            }
             
         } catch {
             self.errorMessage = "問題の取得に失敗しました: \(error.localizedDescription)"
