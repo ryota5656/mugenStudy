@@ -84,3 +84,18 @@ struct SinglePracticeView: View {
         }
     }
 }
+
+#Preview {
+    let sample = ToeicQuestion(
+        id: UUID(),
+        type: .partOfSpeech,
+        prompt: "The manager was (____) satisfied with the quarterly results.",
+        choices: ["extremely", "extreme", "extremes", "more"],
+        answerIndex: 0,
+        explanation: "『extremely』は副詞で形容詞『satisfied』を適切に修飾できる。『extreme』は形容詞、『extremes』は名詞複数、『more』は比較級を示す語でこの文法位置には不適切。",
+        filledSentence: "The manager was extremely satisfied with the quarterly results.",
+        filledSentenceJa: "マネージャーは四半期の結果に非常に満足していた。",
+        choiceTranslationsJa: ["非常に", "極端な", "極端なもの", "より"]
+    )
+    return SinglePracticeView(question: sample, onSelect: { _, _ in })
+}

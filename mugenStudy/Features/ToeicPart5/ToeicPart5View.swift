@@ -15,6 +15,13 @@ struct ToeicPart5View: View {
                 }
                 .padding()
                 .navigationTitle("mugenTOEICpart5")
+                .alert(isPresented: $viewModel.showErrorAlert) {
+                    Alert(
+                        title: Text("エラー"),
+                        message: Text(viewModel.errorMessage ?? "不明なエラーが発生しました"),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
             }
         }
     }
@@ -47,17 +54,27 @@ struct ToeicPart5View: View {
                     }
                 }
             }
-            
-            Button(action: {
-//                Task { await viewModel.fetchQuestions() }
-                Task { await viewModel.checklatestQuestion() }
-            }) {
-                HStack {
-                    if viewModel.isLoading { ProgressView() }
-                    Text("問題を生成")
+            HStack {
+                Button(action: {
+                    Task { await viewModel.checklatestQuestion() }
+                }) {
+                    HStack {
+                        if viewModel.isLoading { ProgressView() }
+                        Text("問題を生成")
+                    }
                 }
+                .buttonStyle(.borderedProminent)
+                
+                Button(action: {
+                    Task { await viewModel.fetchQuestions() }
+                }) {
+                    HStack {
+                        if viewModel.isLoading { ProgressView() }
+                        Text("AI問題を生成")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .buttonStyle(.borderedProminent)
         }
     }
     

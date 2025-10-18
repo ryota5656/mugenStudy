@@ -1,9 +1,11 @@
 import Foundation
 import FirebaseFirestore
+import FirebaseDatabase
 
 // MARK: - Firebase (Realtime Database) minimal REST client
 final class FirebaseService {
     private let db = Firestore.firestore()
+    private let rtdb = Database.database().reference()
 
     // 各itemを別ドキュメントとして一括保存（バッチ書き込み; 1バッチ最大500件）
     func saveQuestions(collection: String, items: [ToeicQuestion], level: Int? = nil) async throws {
@@ -115,6 +117,41 @@ final class FirebaseService {
             .limit(to: 10)
         let snapshot = try await q.getDocuments(source: source)
         return snapshot.count >= 10
+    }
+
+    // MARK: - Realtime Database: increment choice count per question
+    func incrementChoiceCountRTDB(questionId: UUID, choiceIndex: Int) async {
+        guard choiceIndex >= 0 else { return }
+        let likeCountRef = rtdb.child("questions/\(questionId)/likeCounts/")
+        let choiceCountRef = rtdb.child("questions/\(questionId)/choiceCounts/\(choiceIndex)")
+        
+        // ③ choices内のカウントをトランザクションで+1
+        choiceCountRef.runTransactionBlock({ currentData in
+            var value = currentData.value as? Int ?? 0
+            value += 1
+            currentData.value = value
+            return TransactionResult.success(withValue: currentData)
+        }) { error, committed, snapshot in
+            if let error = error {
+                print("Transaction failed: \(error.localizedDescription)")
+            } else if committed {
+                print("Successfully incremented count for choice \(choiceIndex)")
+            }
+        }
+        
+        // ③ choices内のカウントをトランザクションで+1
+        likeCountRef.runTransactionBlock({ currentData in
+            var value = currentData.value as? Int ?? 0
+            value += 1
+            currentData.value = value
+            return TransactionResult.success(withValue: currentData)
+        }) { error, committed, snapshot in
+            if let error = error {
+                print("Transaction failed: \(error.localizedDescription)")
+            } else if committed {
+                print("Successfully incremented count for choice \(choiceIndex)")
+            }
+        }
     }
 }
 

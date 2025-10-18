@@ -1,10 +1,3 @@
-//
-//  mugenStudyApp.swift
-//  mugenStudy
-//
-//  Created by ryota.saito on 2025/09/05.
-//
-
 import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
@@ -17,10 +10,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     FirebaseApp.configure()
     // Enable Firestore offline persistence explicitly
     let settings = FirestoreSettings()
-    settings.isPersistenceEnabled = true
+//    settings.isPersistenceEnabled = true
     Firestore.firestore().settings = settings
       //キャッシュ削除
-//    Firestore.firestore().clearPersistence()
+    settings.isPersistenceEnabled = false
+    Firestore.firestore().clearPersistence()
 
     // Realm migration: bump schema when AnswerHistoryObject fields changed
     let realmConfig = Realm.Configuration(

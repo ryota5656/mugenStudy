@@ -208,17 +208,22 @@ extension GroqToeicService {
                         - Grammar: simple present or simple past only.
                          ❌ Do NOT use passive, perfect, continuous, infinitive phrases, participial, or relative clauses.
                          ❌ Do NOT use advanced verbs like submit, confirm, complete, provide, receive, require.
+                        - Use only simple vocabulary at the TOEIC 300 level.
                         - Allow only one clause (no commas, no subclauses). 'and' or 'but' is OK.
                         - Sentence length: 4–8 words.
                        """
             case .l400:
                 return """
                         Target difficulty: CEFR A2:
-                        - Include basic business collocations (e.g., place an order, attend a meeting, take a break, send an email).
-                        - Grammar: simple present, past, or progressive are allowed; **passive** may appear once.
-                        - Present perfect may appear rarely.
-                        - Allow at most ONE simple subordinate clause (that/when/if/because).
-                        - Sentence length: 8–12 words.
+                        - Use only simple, common business English vocabulary (avoid abstract or formal words like “regulatory,” “compliance,” “statutory,” “align”).
+                        - UGrammar: use simple present, past, or future.
+                        - Do not use passive, present perfect, or relative clauses with “whose,” “which,” “that.”
+                        - Use only one clause per sentence (no commas or subclauses).
+                        - Please use only fairly easy vocabulary at the TOEIC 500 level.
+                        - Each sentence should be 8–12 words long.
+                        - Avoid advanced connectors like “in light of,” “considering,” or “unless.”
+                        - Use only basic conjunctions: “and,” “but,” “or,” “because,” “if,” “when.”
+                        - Avoid complex noun phrases (e.g., “the internal audit procedures” → “the company rules”).
                         """
             case .l600:
                 return """
@@ -226,6 +231,7 @@ extension GroqToeicService {
                         - Focus on phrasal verbs, prepositions, and word usage (e.g., deal with, carry out, look for, depend on).
                         - Include countable/uncountable noun distinctions or comparatives/superlatives when natural.
                         - Grammar: passive, participle phrases, or one relative clause allowed.
+                        - Please use only intermediate vocabulary at the TOEIC 600 level.
                         - Allow one subordinate clause (that/when/if).
                         - Sentence length: 10–15 words.
                         """
@@ -234,6 +240,7 @@ extension GroqToeicService {
                         Target difficulty: CEFR B2: 
                         - Use precise business expressions and collocations (e.g., comply with, adhere to, be subject to). Allow conditionals/hypotheticals (Type 1–2) and more natural ellipsis/participial phrasing.
                         - Ensure tone is professional and formal, but not overly academic.
+                        - Please use only advanced vocabulary at the TOEIC 800 level.
                         - Sentence length: 16–24 words.
                         """
             case .l990:
@@ -243,6 +250,7 @@ extension GroqToeicService {
                         - Semantics: Force fine-grained distinctions (collocation, valency, and preposition choice: responsible for vs responsible to; comply with vs conform to; subject to vs liable for).
                         - Grammar: Use at least one advanced device per item when natural: reduced relative, participial modifier, fronting/inversion after negative adverbials (e.g., Not only ...), complex noun pre-modification, or hypothetical with modal perfect.
                         - Register and tone: formal and precise; avoid conversational substitutes.
+                        - Please use only vocabulary for advanced learners, at the TOEIC score level of 990.
                         - Sentence length: 20–28 words; allow one subordinate structure but keep exactly one blank.
                         - Vocabulary distractor policy (C1 override): For vocabulary items, use options from the same semantic field and register with near meanings that fail collocation/valency/preposition in context, so only choices[0] yields a fully idiomatic and logically correct sentence. Avoid trivial, unrelated words.
                         - Avoid overly generic headwords such as summary, suite, protocol unless the scene strictly requires them.
@@ -397,7 +405,6 @@ extension GroqToeicService {
         - 正解が文法・語法・意味・コロケーションの観点でなぜ正しいか（具体ルール/根拠）
         - 各誤答肢が不適切な理由（形・意味・用法不一致、コロケーション不適合 等）
         - 学習上の注意点（紛らわしい表現や似た語の違い、固定表現 等）
-        - この問題のTOEICスコアレベル評価（例： 600点程度）
 
         Explanation formatting:
         - The explanation must be plain Japanese prose with no double quotes ("), no single quotes ('), no backslashes (\\), no backticks, and no code fences.

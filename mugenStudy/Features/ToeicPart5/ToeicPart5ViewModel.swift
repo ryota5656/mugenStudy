@@ -16,6 +16,7 @@ final class ToeicPart5ViewModel: ObservableObject {
     @Published var selectedChoiceIndex: Int? = nil
     @Published var showExplanation: Bool = false
     @Published var errorMessage: String? = nil
+    @Published var showErrorAlert: Bool = false
     
     private let service: GroqToeicService
     private let firebase: FirebaseService
@@ -42,9 +43,9 @@ final class ToeicPart5ViewModel: ObservableObject {
     var isLastQuestion: Bool { currentIndex == max(questions.count - 1, 0) }
     
     func checklatestQuestion() async {
-        
-        // firebaseの最新日を確認
-        Task {
+        isLoading = true
+        defer { isLoading = false }
+        for attempt in 1...2 {
             do {
                 let item = try await firebase.fetchQuestions(collection: "toeic_part5_items", limit: 1, source: .cache)
                 if item.isEmpty {
@@ -53,23 +54,25 @@ final class ToeicPart5ViewModel: ObservableObject {
                 }
                 let check = try await firebase.existsNewerThan(collection: "toeic_part5_items", since: item[0].updatedAt)
                 if check {
-                    questions = try await firebase.fetchQuestionsPage(collection: "toeic_part5_items",from: item[0].updatedAt, descending: false, pageSize: 10).items
+                    questions = try await firebase.fetchQuestionsPage(collection: "toeic_part5_items", from: item[0].updatedAt, descending: false, pageSize: 10).items
                 } else {
                     await fetchQuestions()
                 }
+                return
             } catch {
-                
+                if attempt == 2 {
+                    self.errorMessage = "最新の問題取得に失敗しました: \(error.localizedDescription)"
+                    self.showErrorAlert = true
+                }
+                continue
             }
         }
-        // firebaseの最新日よりサーバーの最新日が前だったらfirebaseから取得
-        
-        // firebaseの最新日とサーバーが最新日が同じだったらai生成
-        
     }
     
     func fetchQuestions() async {
         guard !selectedTypes.isEmpty else {
             self.errorMessage = "出題カテゴリを1つ以上選択してください"
+            self.showErrorAlert = true
             return
         }
         isLoading = true
@@ -171,27 +174,35 @@ final class ToeicPart5ViewModel: ObservableObject {
 //                ])
 //                return
                 
-        do {
-            let items = try await service.generateQuestions(with: plans, level: selectedLevel, types: Array(selectedTypes))
-            await MainActor.run {
-                self.questions = items
-                for item in items {
-                    print(item.prompt)
-                    for (idx, choice) in item.choices.enumerated() {
-                        print("#\(idx): \(choice)")
-                    }
-                }
-                print(items)
-            }
-            
+        var lastError: Error? = nil
+        for attempt in 1...2 {
             do {
-                try await firebase.saveQuestions(collection: "toeic_part5_items", items: items, level: levelExact)
+                let items = try await service.generateQuestions(with: plans, level: selectedLevel, types: Array(selectedTypes))
+                await MainActor.run {
+                    self.questions = items
+                    for item in items {
+                        print(item.prompt)
+                        for (idx, choice) in item.choices.enumerated() {
+                            print("#\(idx): \(choice)")
+                        }
+                    }
+                    print(items)
+                }
+                do {
+                    try await firebase.saveQuestions(collection: "toeic_part5_items", items: items, level: levelExact)
+                } catch {
+                    self.errorMessage = "Firebase保存に失敗しました: \(error.localizedDescription)"
+                    self.showErrorAlert = true
+                }
+                return
             } catch {
-                self.errorMessage = "Firebase保存に失敗しました: \(error.localizedDescription)"
+                lastError = error
+                if attempt == 2 {
+                    self.errorMessage = "問題の取得に失敗しました: \(error.localizedDescription)"
+                    self.showErrorAlert = true
+                }
+                continue
             }
-            
-        } catch {
-            self.errorMessage = "問題の取得に失敗しました: \(error.localizedDescription)"
         }
     }
     
@@ -205,6 +216,11 @@ final class ToeicPart5ViewModel: ObservableObject {
     }
     
     func goNext() {
+        // 選択結果をRTDBに保存（最終問題でも記録するため早期に実行）
+        if let selected = selectedChoiceIndex, currentIndex < questions.count {
+            let q = questions[currentIndex]
+            Task { await firebase.incrementChoiceCountRTDB(questionId: q.id, choiceIndex: selected) }
+        }
         guard currentIndex + 1 < questions.count else { return }
         currentIndex += 1
         selectedChoiceIndex = nil
