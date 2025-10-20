@@ -2,7 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>GAD_AT_CREATE_TOEIC5</key>
+	<string>$(GAD_AT_CREATE_TOEIC5)</string>
 	<key>GROQ_API_KEY_1</key>
 	<string>$(GROQ_API_KEY_1)</string>
+	<key>GADApplicationIdentifier</key>
+	<string>${GADApplicationIdentifier}</string>
+	<key>GAD_TEST_ID</key>
+	<string>ca-app-pub-3940256099942544/4411468910</string>
 </dict>
 </plist>

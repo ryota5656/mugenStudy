@@ -3,6 +3,7 @@ import FirebaseCore
 import FirebaseFirestore
 import RealmSwift
 import Realm
+import GoogleMobileAds
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
@@ -15,6 +16,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
       //キャッシュ削除
     settings.isPersistenceEnabled = false
     Firestore.firestore().clearPersistence()
+      
+    // adMob SDK初期化
+    MobileAds.shared.start(completionHandler: nil)
 
     // Realm migration: bump schema when AnswerHistoryObject fields changed
     let realmConfig = Realm.Configuration(
@@ -59,6 +63,10 @@ struct MugenStudyApp: SwiftUI.App {
                 NavigationView { AnswerHistoryView() }
                     .tabItem {
                         Label("履歴", systemImage: "clock.arrow.circlepath")
+                    }
+                NavigationView { ToeicVocabularyView() }
+                    .tabItem {
+                        Label("単語問題", systemImage: "clock.arrow.circlepath")
                     }
             }
         }

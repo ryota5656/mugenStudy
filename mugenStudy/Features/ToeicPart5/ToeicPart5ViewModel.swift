@@ -1,5 +1,3 @@
-// MARK: - View Model
-
 import Foundation
 internal import Combine
 import SwiftUI
@@ -82,7 +80,7 @@ final class ToeicPart5ViewModel: ObservableObject {
         selectedChoiceIndex = nil
         showExplanation = false
         defer { isLoading = false }
-        // 15件を作成。typeは選択済みカテゴリで均等配分し、要素はローダーからランダムに取得
+        // 10件を作成。typeは選択済みカテゴリで均等配分し、要素はローダーからランダムに取得
         let total = 10
         let typePool = Array(selectedTypes) // Set -> Array
         // 均等配分（できる限り均等に割り振り、余りは先頭から）
@@ -225,6 +223,12 @@ final class ToeicPart5ViewModel: ObservableObject {
         currentIndex += 1
         selectedChoiceIndex = nil
         showExplanation = false
+    }
+}
+
+extension ToeicPart5ViewModel: InterstitialAdManagerDelegate {
+    func interstitialAdDidDismiss() {
+        print("😃：広告が閉じられました！")
     }
 }
 
