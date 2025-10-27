@@ -52,6 +52,10 @@ struct MugenStudyApp: SwiftUI.App {
     var body: some Scene {
         WindowGroup {
             TabView {
+                NavigationView { ToeicMainView() }
+                    .tabItem {
+                        Label("main", systemImage: "clock.arrow.circlepath")
+                    }
                 NavigationView { ToeicPart5View() }
                     .tabItem {
                         Label("出題", systemImage: "doc.text.magnifyingglass")
@@ -70,6 +74,7 @@ struct MugenStudyApp: SwiftUI.App {
                     }
             }
         }
+        .environment(\.colorScheme, .light)
     }
 }
 

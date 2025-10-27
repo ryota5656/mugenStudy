@@ -82,6 +82,20 @@ enum NgslWordsLoader {
         return pool.randomElement()
     }
 
+    // 1始まりのインデックス範囲でランダム抽出（全体）
+    // 例: 1...10 は先頭10語からランダム
+    static func random(indexRange: ClosedRange<Int>) -> NgslWord? {
+        let words = allWords()
+        guard !words.isEmpty else { return nil }
+        let lower = max(indexRange.lowerBound, 1)
+        let upper = min(indexRange.upperBound, words.count)
+        guard lower <= upper else { return nil }
+        let start = lower - 1
+        let end = upper - 1
+        let slice = words[start...end]
+        return slice.randomElement()
+    }
+
     // 品詞（pos）でフィルタして1語（全体）
     static func random(pos: String? = nil) -> NgslWord? {
         let pool = allWords()

@@ -2,128 +2,135 @@ import SwiftUI
 import FoundationModels
 
 struct ToeicVocabularyView: View {
+    var range: ClosedRange<Int>? = nil
     @StateObject private var viewModel = ToeicVocabularyViewModel()
-    
-    // セッションの準備
-    let session = LanguageModelSession()
-    
-    private var canSend: Bool {
-        !viewModel.isLoading &&
-        !viewModel.instructions.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
-        !viewModel.userInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-    
+    @State private var selectedIndex: Int? = nil
+    @State private var choices: [String] = []
+    @State private var correctIndex: Int = 0
+    @State private var currentQuestion: ToeicQuestion? = nil
+
     var body: some View {
-            NavigationView {
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Instructions入力エリア
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("指示文（Instructions）")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-                            
-                            TextEditor(text: $viewModel.instructions)
-                                .frame(minHeight: 80)
-                                .padding(8)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(8)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color(.systemGray4), lineWidth: 1)
-                                )
-                        }
-                        
-                        // ユーザー入力エリア
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("ユーザー入力")
-                                .font(.headline)
-                                .foregroundColor(.primary)
-                            
-                            TextEditor(text: $viewModel.userInput)
-                                .frame(minHeight: 100)
-                                .padding(8)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(8)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color(.systemGray4), lineWidth: 1)
-                                )
-                        }
-                        
-                        // 送信ボタン
-                        Button {
-                            viewModel.output = nil
-                            viewModel.sendPrompt()
-                        } label: {
-                            HStack {
-                                if viewModel.isLoading {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                        .scaleEffect(0.8)
-                                }
-                                Text(viewModel.isLoading ? "処理中..." : "送信")
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(canSend ? Color.blue : Color.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                        }
-                        .disabled(!canSend)
-                        
-                        // 出力エリア
-                        if let output = viewModel.output {
-                            let sample = ToeicQuestion(
-                                id: UUID(),
-                                type: .vocabulary,
-                                prompt: output.prompt ?? "",
-                                choices: ["\(viewModel.selectWord?.meaning ?? "")", "提唱者，支持者，提唱する", "余分な，余り", "社内の，オフイス間の"],
-                                answerIndex: 0,
-                                filledSentenceJa: output.promptJa
-                            )
-                            SinglePracticeView(question: sample, onSelect: { isCorrect, selectedIndex in
-                            })
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("出力結果")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                                Text(viewModel.selectWord?.word ?? "")
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
-                                    .textSelection(.enabled)
-                                
-                                Text(viewModel.bolded(output.prompt ?? "", keyword: viewModel.selectWord?.word ?? ""))
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
-                                    .textSelection(.enabled)
-                                
-                                Text(output.promptJa ?? "")
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
-                                    .textSelection(.enabled)
-                            }
-                        }
-                    }
-                    .padding()
-                    .onTapGesture {
-                        // キーボードを閉じる
-                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    }
+        ScrollView {
+            VStack(spacing: 20) {
+                if let q = currentQuestion {
+                    SinglePracticeView(
+                        question: q,
+                        onSelect: { _, _ in },
+                        onNext: { prepareNextQuestion() }
+                    )
+                } else {
+                    Text("下のボタンから問題を生成してください")
+                        .foregroundStyle(.secondary)
                 }
-                .navigationTitle("Foundation Models Chat")
-                .navigationBarTitleDisplayMode(.inline)
+            }
+            .padding()
+        }
+        .navigationTitle("Vocabulary Quiz")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear() {
+            if let r = range { viewModel.allowedIndexRange = r }
+            prepareNextQuestion()
+        }
+        .onChange(of: viewModel.output) { _ in
+            // 新しい出力が来たら選択肢を生成してリセット
+            generateChoices()
+            buildQuestion()
+        }
+        .onChange(of: choices) { _ in buildQuestion() }
+        .allowsHitTesting(!viewModel.isLoading)
+        .overlay(alignment: .center) {
+            if viewModel.isLoading {
+                ZStack {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Text("生成中...")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(16)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
             }
         }
+        
+    }
+
+    // 次の問題生成（状態の初期化込み）
+    private func prepareNextQuestion() {
+        
+        selectedIndex = nil
+        choices = []
+        correctIndex = 0
+        viewModel.output = nil
+        viewModel.prePrompt()
+    }
+
+    // 選択肢を生成（正解+ダミー3）
+    private func generateChoices() {
+        guard let correct = viewModel.selectWord?.meaning, !correct.isEmpty else {
+            choices = []
+            correctIndex = 0
+            return
+        }
+        // ダミーの意味はNGSLからランダム抽出（pos一致を優先）
+        var pool: [String] = []
+        if let pos = viewModel.selectWord?.pos {
+            let samePos = (NgslWordsLoader.random(count: 20, pos: pos)).map { $0.meaning }
+            pool.append(contentsOf: samePos)
+        }
+        if pool.count < 3 {
+            let any = (NgslWordsLoader.random(count: 20)).map { $0.meaning }
+            pool.append(contentsOf: any)
+        }
+        // 正解と同一の意味や空を除外
+        let uniqueDummies = Array(
+            pool.filter { !$0.isEmpty && $0 != correct }
+                .uniqued()
+                .prefix(3)
+        )
+        var options = [correct] + uniqueDummies
+        // 足りなければプレースホルダで埋める
+        while options.count < 4 { options.append("—") }
+        options = Array(options.prefix(4))
+        choices = options
+//        correctIndex = shuffledChoices.firstIndex(of: correct) ?? 0
+    }
+
+    private func buildQuestion() {
+        guard let word = viewModel.selectWord, correctIndex < choices.count else {
+            currentQuestion = nil
+            return
+        }
+        let id = UUID()
+        let promptText = viewModel.output?.prompt ?? ""
+        let filledSentenceJa = viewModel.output?.promptJa
+        currentQuestion = ToeicQuestion(
+            id: id,
+            type: .word,
+            prompt: promptText,
+            choices: choices,
+            answerIndex: correctIndex,
+            filledSentenceJa: filledSentenceJa,
+            choiceTranslationsJa: nil,
+            headword: word.word
+        )
+    }
 }
 
-#Preview("FeedChatView") {
+// MARK: - UI Components
+private extension Array where Element: Hashable {
+    func uniqued() -> [Element] {
+        var set = Set<Element>()
+        var result: [Element] = []
+        for e in self {
+            if set.insert(e).inserted { result.append(e) }
+        }
+        return result
+    }
+}
+
+
+#Preview {
     ToeicVocabularyView()
 }
-

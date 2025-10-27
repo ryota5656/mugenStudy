@@ -7,17 +7,18 @@ struct ToeicQuestion: Identifiable, Codable, Equatable {
     let prompt: String
     let choices: [String]
     let answerIndex: Int
-    var explanation: String = ""
+    var explanation: String? = nil
     var filledSentence: String? = nil
     var filledSentenceJa: String? = nil
     var choiceTranslationsJa: [String]? = nil
+    var headword: String? = nil
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
-    
     
     enum CodingKeys: String, CodingKey {
         case id, type, prompt, choices, answerIndex, explanation
         case filledSentence, filledSentenceJa, choiceTranslationsJa
+        case headword
         case createdAt, updatedAt
     }
 
@@ -27,10 +28,11 @@ struct ToeicQuestion: Identifiable, Codable, Equatable {
         prompt: String,
         choices: [String],
         answerIndex: Int,
-        explanation: String = "",
+        explanation: String? = nil,
         filledSentence: String? = nil,
         filledSentenceJa: String? = nil,
-        choiceTranslationsJa: [String]? = nil
+        choiceTranslationsJa: [String]? = nil,
+        headword: String? = nil
     ) {
         self.id = id
         self.type = type
@@ -41,6 +43,7 @@ struct ToeicQuestion: Identifiable, Codable, Equatable {
         self.filledSentence = filledSentence
         self.filledSentenceJa = filledSentenceJa
         self.choiceTranslationsJa = choiceTranslationsJa
+        self.headword = headword
     }
 
     init(from decoder: Decoder) throws {
@@ -54,6 +57,7 @@ struct ToeicQuestion: Identifiable, Codable, Equatable {
         self.filledSentence = try container.decodeIfPresent(String.self, forKey: .filledSentence)
         self.filledSentenceJa = try container.decodeIfPresent(String.self, forKey: .filledSentenceJa)
         self.choiceTranslationsJa = try container.decodeIfPresent([String].self, forKey: .choiceTranslationsJa)
+        self.headword = try container.decodeIfPresent(String.self, forKey: .headword)
         // Decode-only timestamps (do not encode back)
         self.createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date.distantPast
         self.updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date.distantPast
@@ -66,10 +70,11 @@ struct ToeicQuestion: Identifiable, Codable, Equatable {
         try container.encode(prompt, forKey: .prompt)
         try container.encode(choices, forKey: .choices)
         try container.encode(answerIndex, forKey: .answerIndex)
-        if !explanation.isEmpty { try container.encode(explanation, forKey: .explanation) }
+        try container.encodeIfPresent(explanation, forKey: .explanation)
         try container.encodeIfPresent(filledSentence, forKey: .filledSentence)
         try container.encodeIfPresent(filledSentenceJa, forKey: .filledSentenceJa)
         try container.encodeIfPresent(choiceTranslationsJa, forKey: .choiceTranslationsJa)
+        try container.encodeIfPresent(headword, forKey: .headword)
         // Intentionally DO NOT encode createdAt/updatedAt here; server-side meta write will manage them
     }
 }
@@ -78,6 +83,7 @@ enum QuestionType: String, Codable, CaseIterable, Identifiable {
     case grammar
     case partOfSpeech
     case vocabulary
+    case word
     
     var id: String { rawValue }
     var displayName: String {
@@ -85,6 +91,7 @@ enum QuestionType: String, Codable, CaseIterable, Identifiable {
         case .grammar: return "文法"
         case .partOfSpeech: return "品詞"
         case .vocabulary: return "語彙"
+        case .word: return "単語"
         }
     }
 }
