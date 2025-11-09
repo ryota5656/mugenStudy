@@ -1,8 +1,11 @@
 import SwiftUI
+import GoogleMobileAds
 
 struct VocabRangeView: View {
     @StateObject private var vm: VocabRangeViewModel
     @State private var isHeaderExpanded: Bool = false
+    @StateObject private var adManager = InterstitialAdManager(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GAD_AT_CREATE_TOEIC5") as? String)
+    @State private var hostViewController: UIViewController? = nil
 
     init(type: NgslWordCategory, rangeLabel: VocabRange) {
         _vm = StateObject(wrappedValue: VocabRangeViewModel(type: type, item: rangeLabel))
@@ -14,10 +17,37 @@ struct VocabRangeView: View {
             header
             
             wordList
-            
-            footer
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .task { await vm.ensureInitialized() }
+        .navigationTitle("Vocabulary Questions")
+        .task {
+            await vm.ensureInitialized()
+            adManager.delegate = vm
+        }
+        .background(
+            HostControllerReader { vc in
+                self.hostViewController = vc
+            }
+            .frame(width: 0, height: 0)
+        )
+        // 画面下にフッターを固定表示（List の上に表示される）
+        .safeAreaInset(edge: .bottom) {
+            footer
+                .padding(.horizontal)
+        }
+        .onChange(of: vm.shouldNavigateToSession) { isActive in
+            if !isActive {
+                adManager.reload()
+            }
+        }
+        .onReceive(vm.sideEffects) { eff in
+            switch eff {
+            case .showInterstitial:
+                if let vc = hostViewController {
+                    adManager.presentWhenReady(from: vc, timeout: 10)
+                }
+            }
+        }
     }
 }
 
@@ -101,7 +131,7 @@ extension VocabRangeView {
                     ProgressView(value: total == 0 ? 0 : Double(vm.progressCorrect) / Double(total))
                     HStack(spacing: 12) {
                         Label("\(vm.progressCorrect) 正解", systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
+                            .foregroundStyle(.blue)
                         Label("\(vm.progressIncorrect) 不正解", systemImage: "xmark.circle.fill")
                             .foregroundStyle(.red)
                         Label("\(vm.progressUnlearned) 未学習", systemImage: "questionmark.circle")
@@ -130,7 +160,7 @@ extension VocabRangeView {
                         Spacer()
                         if let last = vm.lastResults[word.word] {
                             Image(systemName: last ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                .foregroundStyle(last ? .green : .red)
+                                .foregroundStyle(last ? .blue : .red)
                                 .help("前回の正誤")
                         } else {
                             Image(systemName: "questionmark.circle")
@@ -152,15 +182,40 @@ extension VocabRangeView {
     
     private var footer: some View {
         VStack {
-            NavigationLink(value: MainRoute.vocabSession(words: vm.rangedWords, range: vm.batchSize)) {
+            Button {
+                vm.onStartButtonTapped()
+            } label: {
                 Label("テストを開始", systemImage: "play.fill")
+                    .padding(5)
             }
             .buttonStyle(.borderedProminent)
             .disabled(vm.rangedWords.isEmpty)
+            .background(Color.clear) // ボタン背後を透明に
+            
+            // ViewModelのフラグを監視し、遷移をトリガー
+            NavigationLink(
+                destination: VocabSessionView(words: vm.rangedWords, range: vm.batchSize),
+                isActive: $vm.shouldNavigateToSession
+            ) {
+                EmptyView()
+            }
+            .hidden()
         }
         .padding()
     }
 }
+
+// 現在の UIViewController を解決するためのヘルパー
+private struct HostControllerReader: UIViewControllerRepresentable {
+    var onResolve: (UIViewController) -> Void
+    func makeUIViewController(context: Context) -> UIViewController {
+        let vc = UIViewController()
+        DispatchQueue.main.async { onResolve(vc) }
+        return vc
+    }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+}
+
 #Preview {
     VocabRangeView(type: .essential, rangeLabel: .init(start: 0, end: 200))
 }

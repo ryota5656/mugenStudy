@@ -33,6 +33,10 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate, Observab
             if let error = error {
                 print("❌ Failed to load interstitial ad: \(error.localizedDescription)")
                 self?.isReady = false
+                // 軽い待機の後に自動リロード（ネットワーク等の一時失敗対策）
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+                    self?.loadAd()
+                }
                 return
             }
             self?.interstitial = ad
@@ -40,6 +44,13 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate, Observab
             print("✅ Interstitial ad loaded successfully.")
             self?.isReady = (ad != nil)
         }
+    }
+
+    // 明示的な再ロードAPI
+    func reload() {
+        interstitial = nil
+        isReady = false
+        loadAd()
     }
 
     func showAd(from root: UIViewController) {
@@ -76,6 +87,9 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate, Observab
                 }
                 if Date().timeIntervalSince(start) >= timeout {
                     print("😭: 広告の準備が時間切れでできませんでした")
+                    DispatchQueue.main.async { [weak self] in
+                        self?.delegate?.interstitialAdDidDismiss()
+                    }
                     return
                 }
                 try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s

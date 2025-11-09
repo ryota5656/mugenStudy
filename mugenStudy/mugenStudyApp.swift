@@ -22,7 +22,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     // Realm migration: bump schema when AnswerHistoryObject fields changed
     let realmConfig = Realm.Configuration(
-      schemaVersion: 1,
+      schemaVersion: 2,
       migrationBlock: { migration, oldSchemaVersion in
         if oldSchemaVersion < 1 {
           migration.enumerateObjects(ofType: AnswerHistoryObject.className()) { oldObject, newObject in

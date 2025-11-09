@@ -3,22 +3,22 @@ import SwiftUI
 struct ToeicVocabularyMenuView: View {
 
     private let beginnerRanges: [VocabRange] = [
-        .init(start: 0, end: 200), .init(start: 200, end: 400),
-        .init(start: 400, end: 600), .init(start: 600, end: 800), .init(start: 800, end: 1000)
+        .init(start: 0, end: 200), .init(start: 201, end: 400),
+        .init(start: 401, end: 600), .init(start: 601, end: 800), .init(start: 801, end: 1000)
     ]
     
     private let frequentRanges: [VocabRange] = [
-        .init(start: 0, end: 200), .init(start: 200, end: 400),
-        .init(start: 400, end: 600), .init(start: 600, end: 800), .init(start: 800, end: 1000), .init(start: 1000, end: 1222)
+        .init(start: 0, end: 200), .init(start: 201, end: 400),
+        .init(start: 401, end: 600), .init(start: 601, end: 800), .init(start: 801, end: 1000), .init(start: 1001, end: 1222)
     ]
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 16) {
                 VocabSeriesCardView(
                     levelText: "初級",
                     titleText: "Beginner 1000",
-                    descriptionText: "AIで生成された例文とともに英単語を学べる\nNGSL(TOEIC英単語92%に対応)をベースに\n基本単語1000語収録",
+                    descriptionText: "AIで生成された例文とともに英単語を学べる\nNGSL(TOEIC英単語92%に対応)をベースに\n基本単語約1000語収録",
                     color: .baseColor,
                     ranges: beginnerRanges,
                     rangeLabelBuilder: { range in "Beginner \(range.start)-\(range.end)" },
@@ -35,7 +35,6 @@ struct ToeicVocabularyMenuView: View {
                     linkValueBuilder: { range in MainRoute.vocabRange(type: .frequent1, range: range) }
                 )
             }
-            .padding(.bottom, 16)
         }
         .padding()
         .navigationTitle("Vocabulary Questions")

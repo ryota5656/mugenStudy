@@ -28,16 +28,16 @@ class VocabRangeViewModel: ObservableObject {
     @Published var startIndex: Int = 1
     @Published var endIndex: Int = 20
     @Published var isInitialized: Bool = false
-    @Published var shouldNavigateToTestScreen = false
+    @Published var shouldNavigateToSession: Bool = false
     @Published var favoriteWords: Set<String> = []
     @Published var shuffleOn: Bool = false
     var filteredCount: Int { selectedWords.count }
-    
     
     var effectiveStart: Int {
         guard !selectedWords.isEmpty else { return 0 }
         return min(max(1, startIndex), selectedWords.count)
     }
+    
     var effectiveEnd: Int {
         guard !selectedWords.isEmpty else { return 0 }
         return max(effectiveStart, min(endIndex, selectedWords.count))
@@ -66,6 +66,9 @@ class VocabRangeViewModel: ObservableObject {
 
     var type: NgslWordCategory
     var rangeLabel: VocabRange
+    
+    enum SideEffect { case showInterstitial }
+    let sideEffects = PassthroughSubject<SideEffect, Never>()
     
     init(type: NgslWordCategory,
          item: VocabRange,
@@ -102,6 +105,7 @@ class VocabRangeViewModel: ObservableObject {
     func loadWords() async{
         self.allWords = await repository.words(category: type, start: rangeLabel.start, end: rangeLabel.end)
         self.selectedWords = self.allWords
+        self.endIndex = self.allWords.count
         refreshRecentResults()
         refreshFavorites()
     }
@@ -125,7 +129,6 @@ class VocabRangeViewModel: ObservableObject {
     
     @MainActor
     func applyLikeFilter(_ isOn: Bool) {
-        // 現状はお気に入りデータを保持していないため、トグル変更のトリガとして全体再計算のみ行う
         applyFilter()
     }
 
@@ -150,23 +153,11 @@ class VocabRangeViewModel: ObservableObject {
         }
     }
     
-    func initializeMockLastResults() { /* no-op: Realm 履歴を利用 */ }
-    
-    func submitTest() {
-        print(selectedWords)
-        shouldNavigateToTestScreen = true
-    }
-
-    // お気に入りの切替
     func toggleFavorite(_ word: String) {
         let isFav = favoriteWords.contains(word)
-        // 対象NgslWordを特定
         guard let w = allWords.first(where: { $0.word == word }) else { return }
-        // 永続化（UseCase経由）
         favoriteUseCase.setFavorite(for: w, isFavorite: !isFav)
-        // ローカル状態も更新
         if isFav { favoriteWords.remove(word) } else { favoriteWords.insert(word) }
-        // お気に入りで絞り込み中なら、一覧を再計算
         if showFavoritesOnly { applyFilter() }
     }
 
@@ -174,15 +165,6 @@ class VocabRangeViewModel: ObservableObject {
     func shuffleAllWords() {
         allWords.shuffle()
         applyFilter()
-    }
-
-    // デバッグ用: レンジ内のテスト結果をランダム更新
-    func simulateTestProgress() {
-        var map = lastResults
-        for w in rangedWords {
-            map[w.word] = Bool.random()
-        }
-        lastResults = map
     }
 
     // Realm の最近の履歴から直近の正誤を再構築
@@ -205,6 +187,18 @@ class VocabRangeViewModel: ObservableObject {
             }
         }
         favoriteWords = set
+    }
+    
+    // 画面からの開始通知でフラグ更新
+    func onStartButtonTapped() {
+        sideEffects.send(.showInterstitial)
+    }
+}
+
+extension VocabRangeViewModel: InterstitialAdManagerDelegate {
+    func interstitialAdDidDismiss() {
+        print("😃：広告が閉じられました！")
+        shouldNavigateToSession = true
     }
 }
 
