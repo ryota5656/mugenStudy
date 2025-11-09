@@ -52,20 +52,26 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate, Observab
         }
     }
 
-    // 最大 timeout 秒間、0.5秒ごとに isReady を監視し、true になったら即表示
-    func presentWhenReady(timeout: TimeInterval = 10) {
+    // 最大 timeout 秒間、0.5秒ごとに isReady を監視し、true になったら即表示（VC 明示渡し）
+    func presentWhenReady(from root: UIViewController, timeout: TimeInterval = 10) {
         if isReady {
-            DispatchQueue.main.async { [weak self] in self?.presentInterstitial() }
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.showAd(from: root)
+            }
             return
         }
 
         // timeOutの時間までisReadyを監視してtrueになったら即広告表示
-        let start = Date()
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             let start = Date()
             while true {
-                if isReady {
-                    DispatchQueue.main.async { [weak self] in self?.presentInterstitial() }
+                if self.isReady {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self else { return }
+                        self.showAd(from: root)
+                    }
                     return
                 }
                 if Date().timeIntervalSince(start) >= timeout {
@@ -74,15 +80,6 @@ final class InterstitialAdManager: NSObject, FullScreenContentDelegate, Observab
                 }
                 try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
             }
-        }
-    }
-    
-    // インタースティシャル広告の表示
-    func presentInterstitial() {
-        let root = UIApplication.shared.windows.first?.rootViewController
-        if let ad = interstitial {
-            ad.present(from: root!)
-            self.isReady = false
         }
     }
 

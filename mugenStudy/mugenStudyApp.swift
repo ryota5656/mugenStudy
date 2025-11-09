@@ -51,6 +51,7 @@ struct MugenStudyApp: SwiftUI.App {
     
     var body: some Scene {
         WindowGroup {
+//            ToeicMainView()
             TabView {
                 NavigationView { ToeicMainView() }
                     .tabItem {
@@ -68,7 +69,7 @@ struct MugenStudyApp: SwiftUI.App {
                     .tabItem {
                         Label("履歴", systemImage: "clock.arrow.circlepath")
                     }
-                NavigationView { ToeicVocabularyView() }
+                NavigationView { VocabSessionView(words: [NgslWord.init(word: "test", meaning: "test", pos: "test")], range: 1)}
                     .tabItem {
                         Label("単語問題", systemImage: "clock.arrow.circlepath")
                     }

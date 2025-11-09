@@ -1,11 +1,13 @@
 import SwiftUI
 import Foundation
 import GoogleMobileAds
+internal import Combine
 
 // MARK: - View
 struct ToeicPart5View: View {
     @StateObject private var viewModel = ToeicPart5ViewModel()
     @StateObject private var adManager = InterstitialAdManager(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GAD_AT_CREATE_TOEIC5") as? String)
+    @State private var hostViewController: UIViewController? = nil
     
     var body: some View {
         NavigationView {
@@ -27,6 +29,20 @@ struct ToeicPart5View: View {
             }
             .onAppear {
                 adManager.delegate = viewModel
+            }
+            .background(
+                HostControllerReader { vc in
+                    self.hostViewController = vc
+                }
+                .frame(width: 0, height: 0)
+            )
+            .onReceive(viewModel.sideEffects) { eff in
+                switch eff {
+                case .showInterstitial:
+                    if let vc = hostViewController {
+                        adManager.presentWhenReady(from: vc, timeout: 10)
+                    }
+                }
             }
         }
     }
@@ -62,8 +78,7 @@ struct ToeicPart5View: View {
             HStack {
                 Button(action: {
                     Task {
-                        adManager.presentWhenReady(timeout: 10)
-                        await viewModel.checklatestQuestion()
+                        viewModel.onTapGenerateLatest()
                     }
                 }) {
                     HStack {
@@ -75,8 +90,7 @@ struct ToeicPart5View: View {
                 
                 Button(action: {
                     Task {
-                        adManager.presentWhenReady(timeout: 10)
-                        await viewModel.fetchQuestions()
+                        viewModel.onTapGenerateAI()
                     }
                 }) {
                     HStack {
@@ -110,6 +124,17 @@ struct ToeicPart5View: View {
             }
         }
     }
+}
+
+// 現在の UIViewController を解決するためのヘルパー
+private struct HostControllerReader: UIViewControllerRepresentable {
+    var onResolve: (UIViewController) -> Void
+    func makeUIViewController(context: Context) -> UIViewController {
+        let vc = UIViewController()
+        DispatchQueue.main.async { onResolve(vc) }
+        return vc
+    }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
 #Preview {
