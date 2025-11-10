@@ -4,7 +4,6 @@ import FoundationModels
 // Route設定
 enum MainRoute: Hashable {
     case vocab
-    case part5
     case vocabRange(type: NgslWordCategory, range: VocabRange)
     case vocabSession(words: [NgslWord], range: Int)
 }
@@ -14,8 +13,6 @@ extension MainRoute {
         case .vocab:
             ToeicVocabularyMenuView()
                 .toolbar(.hidden, for: .tabBar)
-        case .part5:
-            ToeicPart5View()
         case .vocabRange(let type, let range):
             VocabRangeView(type: type, rangeLabel: range)
         case .vocabSession(let words, let range):
@@ -55,15 +52,6 @@ extension ToeicMainView {
                 dateText: "AIで生成された例文とともに英単語を学べる\nNGSL(TOEIC英単語92%に対応)をベースに\n基本単語1000語・頻出単語1223語を収録",
                 color: Color.baseColor,
                 onTap: { path.append(MainRoute.vocab) }
-            )
-            .padding(.bottom, 16)
-            
-            PlanCard(
-                level: "Toeic",
-                title: "TOEIC Part5",
-                dateText: "TOEIC PART5風の問題をAIで生成\nA1-C1(toeic300-860)の範囲の問題に挑戦\n",
-                color: Color.baseColor,
-                onTap: { path.append(MainRoute.part5) }
             )
             .padding(.bottom, 16)
             
