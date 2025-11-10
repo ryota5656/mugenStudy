@@ -1,11 +1,14 @@
 import SwiftUI
 import GoogleMobileAds
+import StoreKit
 
 struct VocabRangeView: View {
     @StateObject private var vm: VocabRangeViewModel
     @State private var isHeaderExpanded: Bool = false
     @StateObject private var adManager = InterstitialAdManager(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GAD_AT_CREATE_TOEIC5") as? String)
     @State private var hostViewController: UIViewController? = nil
+    @ObservedObject private var subscriptionManager = StoreKitSubscriptionManager.shared
+    @State private var showSubscriptionAlert: Bool = false
 
     init(type: NgslWordCategory, rangeLabel: VocabRange) {
         _vm = StateObject(wrappedValue: VocabRangeViewModel(type: type, item: rangeLabel))
@@ -69,8 +72,24 @@ extension VocabRangeView {
                     HStack(spacing: 8) {
                         Image(systemName: "star")
                             .foregroundStyle(.blue)
-                        Toggle("", isOn: $vm.showFavoritesOnly)
-                            .labelsHidden()
+                        if subscriptionManager.isSubscribed {
+                            Toggle("", isOn: $vm.showFavoritesOnly)
+                                .labelsHidden()
+                        } else {
+                            // 非会員は無効化＋タップで案内
+                            HStack(spacing: 6) {
+                                Toggle("", isOn: .constant(false))
+                                    .labelsHidden()
+                                    .disabled(true)
+                                Image(systemName: "lock.fill")
+                                    .foregroundStyle(.secondary)
+                                Text("PLUS")
+                                    .font(.caption).bold()
+                                    .foregroundStyle(.secondary)
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture { showSubscriptionAlert = true }
+                        }
                     }
                 
                     HStack(spacing: 8) {
@@ -177,6 +196,11 @@ extension VocabRangeView {
                 }
                 .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             }
+        }
+        .alert("PLUS限定機能", isPresented: $showSubscriptionAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("お気に入り機能はサブスク会員限定です。設定タブから加入できます。")
         }
     }
     

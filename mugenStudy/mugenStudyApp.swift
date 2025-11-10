@@ -48,6 +48,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct MugenStudyApp: SwiftUI.App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
     
     var body: some Scene {
         WindowGroup {
@@ -55,11 +56,11 @@ struct MugenStudyApp: SwiftUI.App {
             TabView {
                 NavigationView { ToeicMainView() }
                     .tabItem {
-                        Label("main", systemImage: "clock.arrow.circlepath")
+                        Label("ホーム", systemImage: "clock.arrow.circlepath")
                     }
-                NavigationView { ToeicPart5View() }
+                NavigationView { SettingsView() }
                     .tabItem {
-                        Label("出題", systemImage: "doc.text.magnifyingglass")
+                        Label("設定", systemImage: "gearshape")
                     }
                 NavigationView { SavedQuestionListView() }
                     .tabItem {
@@ -74,8 +75,8 @@ struct MugenStudyApp: SwiftUI.App {
                         Label("単語問題", systemImage: "clock.arrow.circlepath")
                     }
             }
+            .preferredColorScheme(isDarkMode ? .dark : .light)
         }
-        .environment(\.colorScheme, .light)
     }
 }
 
