@@ -26,7 +26,7 @@ enum CEFRGrammarLoader {
 
     private static func allowedCEFRLevels(for level: ToeicLevel) -> [String] {
         switch level {
-        case .l200: return ["A1", "A2"]      // ~200
+        case .l200: return ["A1"]      // ~200
         case .l400: return ["A2", "B1"]      // 201-400
         case .l600: return ["B1"]             // 401-600
         case .l800: return ["B2"]             // 601-800

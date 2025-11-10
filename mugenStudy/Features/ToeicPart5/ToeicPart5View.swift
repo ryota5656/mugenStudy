@@ -1,9 +1,13 @@
 import SwiftUI
 import Foundation
+import GoogleMobileAds
+internal import Combine
 
 // MARK: - View
 struct ToeicPart5View: View {
     @StateObject private var viewModel = ToeicPart5ViewModel()
+    @StateObject private var adManager = InterstitialAdManager(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GAD_AT_CREATE_TOEIC5") as? String)
+    @State private var hostViewController: UIViewController? = nil
     
     var body: some View {
         NavigationView {
@@ -15,6 +19,30 @@ struct ToeicPart5View: View {
                 }
                 .padding()
                 .navigationTitle("mugenTOEICpart5")
+                .alert(isPresented: $viewModel.showErrorAlert) {
+                    Alert(
+                        title: Text("エラー"),
+                        message: Text(viewModel.errorMessage ?? "不明なエラーが発生しました"),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
+            }
+            .onAppear {
+                adManager.delegate = viewModel
+            }
+            .background(
+                HostControllerReader { vc in
+                    self.hostViewController = vc
+                }
+                .frame(width: 0, height: 0)
+            )
+            .onReceive(viewModel.sideEffects) { eff in
+                switch eff {
+                case .showInterstitial:
+                    if let vc = hostViewController {
+                        adManager.presentWhenReady(from: vc, timeout: 10)
+                    }
+                }
             }
         }
     }
@@ -47,16 +75,31 @@ struct ToeicPart5View: View {
                     }
                 }
             }
-            
-            Button(action: {
-                Task { await viewModel.fetchQuestions2() }
-            }) {
-                HStack {
-                    if viewModel.isLoading { ProgressView() }
-                    Text("問題を生成")
+            HStack {
+                Button(action: {
+                    Task {
+                        viewModel.onTapGenerateLatest()
+                    }
+                }) {
+                    HStack {
+                        if viewModel.isLoading { ProgressView() }
+                        Text("問題を生成")
+                    }
                 }
+                .buttonStyle(.borderedProminent)
+                
+                Button(action: {
+                    Task {
+                        viewModel.onTapGenerateAI()
+                    }
+                }) {
+                    HStack {
+                        if viewModel.isLoading { ProgressView() }
+                        Text("AI問題を生成")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .buttonStyle(.borderedProminent)
         }
     }
     
@@ -81,71 +124,17 @@ struct ToeicPart5View: View {
             }
         }
     }
-    
-    
-    
-    
-    @ViewBuilder
-    private func questionView(_ q: ToeicQuestion) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(q.type.displayName)
-                    .font(.subheadline)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.blue.opacity(0.1))
-                    .cornerRadius(6)
-                Spacer()
-                Text("\(viewModel.currentIndex + 1) / \(viewModel.questions.count)")
-                    .font(.subheadline)
-            }
-            Text(q.prompt)
-                .font(.title3)
-                .fixedSize(horizontal: false, vertical: true)
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(Array(q.choices.enumerated()), id: \.offset) { idx, choice in
-                    Button(action: { viewModel.selectChoice(idx) }) {
-                        HStack(alignment: .top) {
-                            Text(String(UnicodeScalar(65 + idx)!))
-                                .bold()
-                            Text(choice)
-                                .multilineTextAlignment(.leading)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer()
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .disabled(viewModel.showExplanation)
-                }
-            }
-            
-            if viewModel.showExplanation, let selected = viewModel.selectedChoiceIndex {
-                let isCorrect = selected == q.answerIndex
-                HStack(spacing: 8) {
-                    Image(systemName: isCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                        .foregroundColor(isCorrect ? .green : .red)
-                    Text(isCorrect ? "正解！" : "不正解")
-                        .bold()
-                }
-                Text("解説: \(q.explanation)")
-                    .font(.body)
-                    .padding(.top, 4)
-                    .frame(maxWidth: .infinity, maxHeight: 500)
-                Text("英文：「\(q.filledSentence ?? "")」")
-                    .font(.body)
-                    .padding(.top, 4)
-                Text("日本語訳：「\(q.filledSentenceJa ?? "")」")
-                    .font(.body)
-                    .padding(.top, 4)
-                ForEach(Array((q.choiceTranslationsJa ?? []).enumerated()), id: \.offset) { idx, choice in
-                    Text("選択肢\(String(UnicodeScalar(65 + idx)!))：「\(choice)」")
-                        .font(.body)
-                        .padding(.top, 4)
-                }
-                .buttonStyle(.borderedProminent)
-            }
-        }
+}
+
+// 現在の UIViewController を解決するためのヘルパー
+private struct HostControllerReader: UIViewControllerRepresentable {
+    var onResolve: (UIViewController) -> Void
+    func makeUIViewController(context: Context) -> UIViewController {
+        let vc = UIViewController()
+        DispatchQueue.main.async { onResolve(vc) }
+        return vc
     }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
 }
 
 #Preview {

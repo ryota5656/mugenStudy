@@ -45,17 +45,140 @@ extension GroqToeicService {
     }
 
     func generateQuestions(with plans: [ItemPlan], level: ToeicLevel, types: [QuestionType]) async throws -> [ToeicQuestion] {
-        let jsonSchemaExample = """
-        {
-          "questions": [
-            {
-              "type": "grammar | partOfSpeech | vocabulary",
-              "prompt": "Sentence with a blank (____)",
-              "choices": ["CORRECT", "DISTRACTOR", "DISTRACTOR", "DISTRACTOR"]
+        let jsonSchemaExample: String = {
+            switch level {
+            case .l200:
+                return """
+                       {
+                         "questions": [
+                           {
+                             "type": "grammar",
+                             "prompt": "He (____) a teacher.,
+                             "choices": ["is", "are", "am", "be"]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "vocabulary",
+                             "prompt": "I want a (____) car.",
+                             "choices": ["fast", "read", "run", "sleep"]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "partOfSpeech",
+                             "prompt": "She works (____).",
+                             "choices": ["hard", "harder", "hardness", "hardly"]
+                           }
+                         ]
+                       }
+                       """
+            case .l400:
+                return """
+                       {
+                         "questions": [
+                           {
+                             "type": "grammar",
+                             "prompt": "The meeting (____) at 3 p.m. today.",
+                             "choices": ["starts", "start", "started", "starting]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "vocabulary",
+                             "prompt": "The company will (____) a new product soon.",
+                             "choices": ["launch", "lunch", "lend", "land"]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "partOfSpeech",
+                             "prompt": "Please be (____) when speaking to customers.",
+                             "choices": ["polite", "politely", "politeness", "politer"]
+                           }
+                         ]
+                       }
+                       """
+            case .l600:
+                return """
+                       {
+                         "questions": [
+                           {
+                             "type": "grammar",
+                             "prompt": "If the report (____) finished today, we can send it tomorrow.",
+                             "choices": ["is", "was", "has", "will"]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "vocabulary",
+                             "prompt": "The manager (____) the team to improve communication skills.",
+                             "choices": ["encouraged", "entered", "enjoyed", "examined"]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "partOfSpeech",
+                             "prompt": "The company’s (____) growth impressed many investors this year.",
+                             "choices": ["rapid", "rapidly", "rapidity", "more rapid"]
+                           }
+                         ]
+                       }
+                       """
+            case .l800:
+                return """
+                       {
+                         "questions": [
+                           {
+                             "type": "grammar",
+                             "prompt": "The software update, which was delayed due to system testing, (____) automatically once all devices are connected to the network.",
+                             "choices": ["will installs", "installing", "install", "installs"]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "vocabulary",
+                             "prompt": "The manager emphasized the need to (____) transparency and accountability throughout the organization’s decision-making process.",
+                             "choices": ["maintain", "mention", "measure", "memorize"]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "partOfSpeech",
+                             "prompt": "The newly introduced policy aims to reduce (____) among employees and improve overall workplace satisfaction.",
+                             "choices": ["stress", "stressful", "stressing", "stressed"]
+                           }
+                         ]
+                       }
+                       """
+            case .l990:
+                return """
+                       {
+                         "questions": [
+                           {
+                             "type": "grammar",
+                             "prompt": "Had the project been approved by the board earlier, the company (____) secured additional funding before the market conditions worsened.",
+                             "choices": ["would have", "has", "had", "will have"]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "vocabulary",
+                             "prompt": "To remain competitive in an increasingly volatile market, the firm must (____) innovative solutions that anticipate client needs and regulatory shifts.,
+                             "choices": ["devise", "divide", "derive", "describe"]
+                           }
+                         ],
+                         [
+                           {
+                             "type": "partOfSpeech",
+                             "prompt": "The CEO’s speech was both (____) and inspirational, leaving the audience with a renewed sense of purpose and confidence in the company’s vision.",
+                             "choices": ["persuasive", "persuade", "persuasion", "persuasively"]
+                           }
+                         ]
+                       }
+                       """
             }
-          ]
-        }
-        """
+        }()
 
         let plansForPrompt: [PlanForPrompt] = plans.sorted { $0.index < $1.index }.map { p in
             PlanForPrompt(
@@ -63,7 +186,8 @@ extension GroqToeicService {
                 type: p.type.rawValue,
                 scene: .init(text: p.sceneText),
                 grammar: p.grammarSubcategory,
-                vocab: p.vocab?.headword
+                vocab: p.vocab?.headword,
+                pos: p.pos
             )
         }
 
@@ -71,39 +195,52 @@ extension GroqToeicService {
         encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
         let constraintsJSON = (try? String(data: encoder.encode(plansForPrompt), encoding: .utf8)) ?? "[]"
         let allowed = Array(Set(plans.map { $0.type.rawValue })).sorted().joined(separator: ", ")
+        
+
 
         // Difficulty rubric per TOEIC level
         let levelRules: String = {
             switch level {
             case .l200:
                 return """
-                        Target difficulty: CEFR A1–A2: Use only very simple and common English words (e.g., work, meet, send, make, get, go, have, need, want, use, show, say).
+                        Target difficulty: CEFR A1: 
+                        - Use only very simple and common English words (e.g., work, meet, send, make, get, go, have, need, want, use, show, say).
                         - Grammar: simple present or simple past only.
                          ❌ Do NOT use passive, perfect, continuous, infinitive phrases, participial, or relative clauses.
                          ❌ Do NOT use advanced verbs like submit, confirm, complete, provide, receive, require.
+                        - Use only simple vocabulary at the TOEIC 300 level.
                         - Allow only one clause (no commas, no subclauses). 'and' or 'but' is OK.
-                        - Sentence length: 12–18 words.
+                        - Sentence length: 4–8 words.
                        """
             case .l400:
                 return """
-                        Target difficulty: CEFR A2–B1: - Include basic business collocations (e.g., place an order, attend a meeting, take a break, send an email).
-                        - Grammar: simple present, past, or progressive are allowed; **passive** may appear once.
-                        - Present perfect may appear rarely.
-                        - Allow at most ONE simple subordinate clause (that/when/if/because).
-                        - Sentence length: 14–20 words.
+                        Target difficulty: CEFR A2:
+                        - Use only simple, common business English vocabulary (avoid abstract or formal words like “regulatory,” “compliance,” “statutory,” “align”).
+                        - UGrammar: use simple present, past, or future.
+                        - Do not use passive, present perfect, or relative clauses with “whose,” “which,” “that.”
+                        - Use only one clause per sentence (no commas or subclauses).
+                        - Please use only fairly easy vocabulary at the TOEIC 500 level.
+                        - Each sentence should be 8–12 words long.
+                        - Avoid advanced connectors like “in light of,” “considering,” or “unless.”
+                        - Use only basic conjunctions: “and,” “but,” “or,” “because,” “if,” “when.”
+                        - Avoid complex noun phrases (e.g., “the internal audit procedures” → “the company rules”).
                         """
             case .l600:
                 return """
-                        Target difficulty: CEFR B1: Focus on phrasal verbs, prepositions, and word usage (e.g., deal with, carry out, look for, depend on).
+                        Target difficulty: CEFR from A2 to B1-: 
+                        - Focus on phrasal verbs, prepositions, and word usage (e.g., deal with, carry out, look for, depend on).
                         - Include countable/uncountable noun distinctions or comparatives/superlatives when natural.
                         - Grammar: passive, participle phrases, or one relative clause allowed.
+                        - Please use only intermediate vocabulary at the TOEIC 600 level.
                         - Allow one subordinate clause (that/when/if).
-                        - Sentence length: 15–22 words.
+                        - Sentence length: 10–15 words.
                         """
             case .l800:
                 return """
-                        Target difficulty: CEFR B2: Use precise business expressions and collocations (e.g., comply with, adhere to, be subject to). Allow conditionals/hypotheticals (Type 1–2) and more natural ellipsis/participial phrasing.
+                        Target difficulty: CEFR B2: 
+                        - Use precise business expressions and collocations (e.g., comply with, adhere to, be subject to). Allow conditionals/hypotheticals (Type 1–2) and more natural ellipsis/participial phrasing.
                         - Ensure tone is professional and formal, but not overly academic.
+                        - Please use only advanced vocabulary at the TOEIC 800 level.
                         - Sentence length: 16–24 words.
                         """
             case .l990:
@@ -113,18 +250,13 @@ extension GroqToeicService {
                         - Semantics: Force fine-grained distinctions (collocation, valency, and preposition choice: responsible for vs responsible to; comply with vs conform to; subject to vs liable for).
                         - Grammar: Use at least one advanced device per item when natural: reduced relative, participial modifier, fronting/inversion after negative adverbials (e.g., Not only ...), complex noun pre-modification, or hypothetical with modal perfect.
                         - Register and tone: formal and precise; avoid conversational substitutes.
+                        - Please use only vocabulary for advanced learners, at the TOEIC score level of 990.
                         - Sentence length: 20–28 words; allow one subordinate structure but keep exactly one blank.
+                        - Vocabulary distractor policy (C1 override): For vocabulary items, use options from the same semantic field and register with near meanings that fail collocation/valency/preposition in context, so only choices[0] yields a fully idiomatic and logically correct sentence. Avoid trivial, unrelated words.
                         - Avoid overly generic headwords such as summary, suite, protocol unless the scene strictly requires them.
                         """
             }
         }()
-        
-        var targetC1: String?
-        if level == .l990 {
-            targetC1 = "Vocabulary distractor policy (C2 override): For vocabulary items, use options from the same semantic field and register with near meanings that fail collocation/valency/preposition in context, so only choices[0] yields a fully idiomatic and logically correct sentence. Avoid trivial, unrelated words.Please update it to use near‑synonym distractors that require precise discrimination of collocation and valency/subcategorization, and to employ advanced constructions."
-        } else {
-            targetC1 = "Critically, ALL distractors (choices[1], choices[2], choices[3]) MUST be semantically FAR from the correct meaning in the given sentence context and MUST make the completed sentence unambiguously incorrect or illogical. BAN near-synonyms, quasi-synonyms, collocational substitutes, hypernyms/hyponyms, and same semantic-field alternatives that could still fit the sentence. Keep POS-matched but choose distractors from DIFFERENT semantic classes/domains so the sentence clearly fails with them. "
-        }
 
         let system = "You are an expert TOEIC Part 5 item writer."
         let user = """
@@ -132,31 +264,60 @@ extension GroqToeicService {
         - Allowed categories (mix ok): \(allowed)
         - Each question MUST have exactly 4 choices and one correct answer.
         - The correct answer MUST be choices[0]. Do NOT randomize correct position.
-        - \(levelRules)
-
-        Follow these per-item plans EXACTLY (1-to-1 by index; do not invent/omit/modify any plan):
-        \(constraintsJSON)
-
-        Rules per type:
-        - grammar: Target EXACTLY the provided "grammar" subcategory from grammar.json. The blank must test that rule; distractors should contrast it.
-        - vocabulary: You MUST include the provided vocab.headword (from the plan) as one of the four options and make it the ONLY correct answer. Use the headword string EXACTLY as provided (case-insensitive), do not alter it. All four choices MUST be distinct single-word headwords of the SAME part of speech (POS), like TOEIC Part 5 vocabulary items. Do NOT use inflectional/derivational variants of the same lemma among the options (no plural -s, -ed/-ing forms, comparative/superlative, or same-stem derivations like manage/management/manager). Avoid capitalization-only differences and hyphenation variants.
-        - partOfSpeech: Validate the required POS via the scene context; distractors must be POS-correct but semantically wrong.
-        \(targetC1)
-        - Please review the generated question to ensure it follows the specified CEFR level. If it does not fully match the level, regenerate it repeatedly until it fits the level accurately.
-
-        Scene usage:
-        - Use the provided "scene.text" naturally (do not name the label). Make the sentence context fit that scene.
-
-        General constraints:
-        - The prompt contains a single blank like (____).
+        
+        1. General constraints
+        - The prompt always contains (____).
         - type is one of: grammar, partOfSpeech, vocabulary.
         - Ensure diversity across items (topics/structures/headwords). Do not repeat the same lemma in blanks.
         - Choice-set validation: exactly one correct answer; options are four DISTINCT headwords (no duplicates, no same-lemma variants, no capitalization/hyphenation-only differences); for vocabulary items the correct option MUST equal the provided vocab.headword string and MUST be placed at choices[0]; no “All/None of the above”; do NOT randomize correct answer position; avoid multiword phrases for vocabulary items.
         - Include at least one adverbial or prepositional phrase for realistic context (e.g., time, reason, condition) while keeping exactly one blank.
         - Keep sentences specific and natural. Avoid template-like prompts.
 
-        Output exactly the following JSON shape and nothing else (no prose):
-        \(jsonSchemaExample)
+        2. Plan
+        - Please make sure to follow the level of the questions written below.
+        - The level of the questions cannot be too high or too low.
+        \(constraintsJSON)
+        
+        3. Level Rules (CEFR-based)
+          \(levelRules)
+        
+        4. Rules per Type
+        - If json type key is grammar:
+          - Target EXACTLY the specified grammar subcategory from grammar.json.
+          - The blank must test that rule; distractors must contrast it.
+          - All options must be grammatically valid in isolation.
+        
+        - If json type key is partOfSpeech:
+          - Validate the required POS via the scene context.
+          - Distractors must be POS-correct but semantically wrong.
+          - Choices[0] should contain the correct part of speech, and choices[1] through choices[3] should contain different parts of speech for the same word.
+
+        - If json type key is vocabulary:
+          - You MUST include the provided target word as one of the four options (unchanged).
+          - All choices must be single-word headwords of the same POS.
+          - Avoid derivational or inflectional variants (e.g., manage/management/manager).
+          - Distractors must be semantically plausible but incorrect in meaning or collocation.
+          - The options from choices[1] to choices[3] must be completely different words from the context.
+        
+        5. Level-specific Distractor Policy
+        - For CEFR B1 and below:
+          - Distractors must be semantically FAR from the correct meaning.
+          - BAN near-synonyms, quasi-synonyms, hypernyms/hyponyms, and same semantic-field alternatives.
+
+        - For CEFR B2 and above:
+          - Use near-synonyms and same-register words requiring precise collocation or valency discrimination.
+          - Only the correct choice should yield a fully idiomatic, logically coherent sentence.
+          - Encourage subtle distinctions in tone, usage, and lexical preference.
+        
+        6. Scene usage
+          - Each question’s “scene” provides a contextual domain.
+          - The question must logically match the given scene and vocabulary register.
+          - Avoid generic or out-of-context sentences.
+        
+        7. Output Format Example 
+          - The format should be the following json format:
+          - Please create the question’s level by checking the Level Rules and the following json.
+          \(jsonSchemaExample)
         """
 
         let decoded = try await performChat(
@@ -218,10 +379,7 @@ extension GroqToeicService {
         })
         print(payload)
 
-        var targetC1: String?
-        if level == .l990 {
-            targetC1 = "Target level: CEFR C1 (TOEIC 990). Upgrade items to this level while preserving the tested point and a single correct answer."
-        }
+        var targetC2: String?
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
         let payloadJSON = (try? String(data: encoder.encode(payload), encoding: .utf8)) ?? "{}"
@@ -229,12 +387,12 @@ extension GroqToeicService {
         let system = "You are an expert TOEIC Part 5 reviewer and English grammar/vocabulary instructor."
         let user = """
         REVIEW AND REPAIR the following TOEIC Part 5 multiple-choice questions.
-        
+
         Phase 1 — Repair first:
         - Ensure the item has EXACTLY ONE correct answer in its current sentence context, and that the ONLY correct option is placed at choices[0].
         - If multiple options could be acceptable, MODIFY DISTRACTORS so that ONLY choices[0] remains correct. Keep the prompt unchanged. Keep exactly 4 options. Preserve the correct option string when possible and place it at choices[0].
+        - Your options must consist of 1–3 words (or short phrases).
         - Explicitly sanity-check each of choices[1], choices[2], choices[3] in the completed sentence; if ANY could be acceptable to a well-informed TOEIC writer, EXCLUDE the item from the final output.
-        - Fix an incorrect answerIndex to the correct 0..3 position.
         - Remove duplicate or near-duplicate options (including same-lemma variants) and meta options like "All/None of the above"; replace with plausible but incorrect distractors that fit the context and POS.
         - Make the English sentence natural and idiomatic for business/TOEIC usage (fix awkward phrasing, collocation, or grammar if needed without changing the tested point).
 
@@ -247,10 +405,10 @@ extension GroqToeicService {
         - 正解が文法・語法・意味・コロケーションの観点でなぜ正しいか（具体ルール/根拠）
         - 各誤答肢が不適切な理由（形・意味・用法不一致、コロケーション不適合 等）
         - 学習上の注意点（紛らわしい表現や似た語の違い、固定表現 等）
-        - この問題がCEFRのどのランクか評価して欲しい(例　A1, A2, B1, B2, C1, C2)
 
         Explanation formatting:
-        - The explanation must be plain Japanese prose with no double quotes ("), no single quotes ('), no backslashes (\\), no backticks, and no code fences. If you need to mark terms, use Japanese brackets 「」 or （） instead.
+        - The explanation must be plain Japanese prose with no double quotes ("), no single quotes ('), no backslashes (\\), no backticks, and no code fences.
+        - If you need to mark terms, use Japanese brackets 「」 or （） instead.
 
         Input JSON:
         \(payloadJSON)
@@ -263,17 +421,19 @@ extension GroqToeicService {
               "type": "grammar | partOfSpeech | vocabulary",
               "prompt": "Sentence with a blank (____)",
               "choices": ["A", "B", "C", "D"],
-              "explanation": "日本語での詳細解説",
+              "explanation": "日本語での詳細解説（最後にCEFR目標レベルとの整合性コメントを含む）",
               "filled_sentence": "正解を埋めた英文",
               "filled_sentence_ja": "上記英文の日本語訳",
               "choice_translations_ja": ["Aの日本語訳","Bの日本語訳","Cの日本語訳","Dの日本語訳"]
             }
           ]
         }
+
         Rules for the output array:
         - May be SHORTER than the input (items that fail the final gate must be excluded). Do NOT create new items.
         - Each object MUST correspond to an existing input index.
         - The "choices" field is OPTIONAL. When provided, it MUST contain exactly 4 strings and will REPLACE the original options to enforce a single correct answer. The correct answer MUST be choices[0]. Do NOT change the prompt.
+
         """
 
         let decoded = try await performChat(

@@ -1,15 +1,9 @@
-//
-//  mugenStudyApp.swift
-//  mugenStudy
-//
-//  Created by ryota.saito on 2025/09/05.
-//
-
 import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
 import RealmSwift
 import Realm
+import GoogleMobileAds
 
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
@@ -17,12 +11,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     FirebaseApp.configure()
     // Enable Firestore offline persistence explicitly
     let settings = FirestoreSettings()
-    settings.isPersistenceEnabled = true
+//    settings.isPersistenceEnabled = true
     Firestore.firestore().settings = settings
+      //キャッシュ削除
+    settings.isPersistenceEnabled = false
+    Firestore.firestore().clearPersistence()
+      
+    // adMob SDK初期化
+    MobileAds.shared.start(completionHandler: nil)
 
     // Realm migration: bump schema when AnswerHistoryObject fields changed
     let realmConfig = Realm.Configuration(
-      schemaVersion: 1,
+      schemaVersion: 2,
       migrationBlock: { migration, oldSchemaVersion in
         if oldSchemaVersion < 1 {
           migration.enumerateObjects(ofType: AnswerHistoryObject.className()) { oldObject, newObject in
@@ -48,13 +48,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 @main
 struct MugenStudyApp: SwiftUI.App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
     
     var body: some Scene {
         WindowGroup {
+//            ToeicMainView()
             TabView {
-                NavigationView { ToeicPart5View() }
+                NavigationView { ToeicMainView() }
                     .tabItem {
-                        Label("出題", systemImage: "doc.text.magnifyingglass")
+                        Label("ホーム", systemImage: "clock.arrow.circlepath")
+                    }
+                NavigationView { SettingsView() }
+                    .tabItem {
+                        Label("設定", systemImage: "gearshape")
                     }
                 NavigationView { SavedQuestionListView() }
                     .tabItem {
@@ -64,7 +70,12 @@ struct MugenStudyApp: SwiftUI.App {
                     .tabItem {
                         Label("履歴", systemImage: "clock.arrow.circlepath")
                     }
+                NavigationView { VocabSessionView(words: [NgslWord.init(word: "test", meaning: "test", pos: "test")], range: 1)}
+                    .tabItem {
+                        Label("単語問題", systemImage: "clock.arrow.circlepath")
+                    }
             }
+            .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }
 }

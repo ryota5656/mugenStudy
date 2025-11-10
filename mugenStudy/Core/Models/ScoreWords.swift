@@ -72,5 +72,3 @@ enum ScoreWordsLoader {
         return best.words.randomElement()
     }
 }
-
-

@@ -14,6 +14,8 @@
 		4B803FE22E884E4C007F1BE1 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 4B803FE12E884E4C007F1BE1 /* FirebaseStorage */; };
 		4B8D5B762E8C0F8600DD6D0A /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4B8D5B752E8C0F8600DD6D0A /* RealmSwift */; };
 		4B8D5BBF2E8C4AA100DD6D0A /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 4B8D5B752E8C0F8600DD6D0A /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		4BABC1B22EC21AD70035EAAE /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BABC1B12EC21AD70035EAAE /* StoreKit.framework */; };
+		4BF27F3E2EA3387A00E6E3AF /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 4BF27F3D2EA3387A00E6E3AF /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +50,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4BABC1B12EC21AD70035EAAE /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		4BD755C82E69E6C300DE6BE1 /* mugenStudy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mugenStudy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BD755D52E69E6C500DE6BE1 /* mugenStudyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = mugenStudyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BD755DF2E69E6C500DE6BE1 /* mugenStudyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = mugenStudyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,9 +95,11 @@
 				4B803FDE2E884E4C007F1BE1 /* FirebaseDatabase in Frameworks */,
 				4B8D5B762E8C0F8600DD6D0A /* RealmSwift in Frameworks */,
 				4B803FE02E884E4C007F1BE1 /* FirebaseFirestore in Frameworks */,
+				4BABC1B22EC21AD70035EAAE /* StoreKit.framework in Frameworks */,
 				4B803FDC2E884E4C007F1BE1 /* FirebaseCore in Frameworks */,
 				4B803FE22E884E4C007F1BE1 /* FirebaseStorage in Frameworks */,
 				4B803FDA2E884E4C007F1BE1 /* FirebaseAuth in Frameworks */,
+				4BF27F3E2EA3387A00E6E3AF /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,12 +120,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4BABC1B02EC21AD70035EAAE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4BABC1B12EC21AD70035EAAE /* StoreKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		4BD755BF2E69E6C300DE6BE1 = {
 			isa = PBXGroup;
 			children = (
 				4BD755CA2E69E6C300DE6BE1 /* mugenStudy */,
 				4BD755D82E69E6C500DE6BE1 /* mugenStudyTests */,
 				4BD755E22E69E6C500DE6BE1 /* mugenStudyUITests */,
+				4BABC1B02EC21AD70035EAAE /* Frameworks */,
 				4BD755C92E69E6C300DE6BE1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -162,6 +176,7 @@
 				4B803FDF2E884E4C007F1BE1 /* FirebaseFirestore */,
 				4B803FE12E884E4C007F1BE1 /* FirebaseStorage */,
 				4B8D5B752E8C0F8600DD6D0A /* RealmSwift */,
+				4BF27F3D2EA3387A00E6E3AF /* GoogleMobileAds */,
 			);
 			productName = mugenStudy;
 			productReference = 4BD755C82E69E6C300DE6BE1 /* mugenStudy.app */;
@@ -248,6 +263,7 @@
 			packageReferences = (
 				4B803FD82E884E4C007F1BE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				4B8D5B722E8C0F8600DD6D0A /* XCRemoteSwiftPackageReference "realm-swift" */,
+				4BF27F3C2EA3387A00E6E3AF /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4BD755C92E69E6C300DE6BE1 /* Products */;
@@ -442,7 +458,7 @@
 		4BD755EA2E69E6C500DE6BE1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = 4BD755CA2E69E6C300DE6BE1 /* mugenStudy */;
-			baseConfigurationReferenceRelativePath = Config/Production.xcconfig;
+			baseConfigurationReferenceRelativePath = Core/Config/Production.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -489,7 +505,7 @@
 		4BD755EB2E69E6C500DE6BE1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = 4BD755CA2E69E6C300DE6BE1 /* mugenStudy */;
-			baseConfigurationReferenceRelativePath = Config/Production.xcconfig;
+			baseConfigurationReferenceRelativePath = Core/Config/Production.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -693,6 +709,14 @@
 				kind = branch;
 			};
 		};
+		4BF27F3C2EA3387A00E6E3AF /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.12.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -725,6 +749,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4B8D5B722E8C0F8600DD6D0A /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		4BF27F3D2EA3387A00E6E3AF /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4BF27F3C2EA3387A00E6E3AF /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
