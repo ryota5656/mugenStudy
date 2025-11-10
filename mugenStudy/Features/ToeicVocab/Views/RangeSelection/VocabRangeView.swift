@@ -81,11 +81,6 @@ extension VocabRangeView {
                                 Toggle("", isOn: .constant(false))
                                     .labelsHidden()
                                     .disabled(true)
-                                Image(systemName: "lock.fill")
-                                    .foregroundStyle(.secondary)
-                                Text("PLUS")
-                                    .font(.caption).bold()
-                                    .foregroundStyle(.secondary)
                             }
                             .contentShape(Rectangle())
                             .onTapGesture { showSubscriptionAlert = true }

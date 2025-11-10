@@ -11,10 +11,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     FirebaseApp.configure()
     // Enable Firestore offline persistence explicitly
     let settings = FirestoreSettings()
-//    settings.isPersistenceEnabled = true
+    settings.isPersistenceEnabled = true
     Firestore.firestore().settings = settings
-      //キャッシュ削除
-    settings.isPersistenceEnabled = false
+    //キャッシュ削除
+//    settings.isPersistenceEnabled = false
     Firestore.firestore().clearPersistence()
       
     // adMob SDK初期化
@@ -52,7 +52,6 @@ struct MugenStudyApp: SwiftUI.App {
     
     var body: some Scene {
         WindowGroup {
-//            ToeicMainView()
             TabView {
                 NavigationView { ToeicMainView() }
                     .tabItem {
@@ -61,18 +60,6 @@ struct MugenStudyApp: SwiftUI.App {
                 NavigationView { SettingsView() }
                     .tabItem {
                         Label("設定", systemImage: "gearshape")
-                    }
-                NavigationView { SavedQuestionListView() }
-                    .tabItem {
-                        Label("保存", systemImage: "tray.full")
-                    }
-                NavigationView { AnswerHistoryView() }
-                    .tabItem {
-                        Label("履歴", systemImage: "clock.arrow.circlepath")
-                    }
-                NavigationView { VocabSessionView(words: [NgslWord.init(word: "test", meaning: "test", pos: "test")], range: 1)}
-                    .tabItem {
-                        Label("単語問題", systemImage: "clock.arrow.circlepath")
                     }
             }
             .preferredColorScheme(isDarkMode ? .dark : .light)
