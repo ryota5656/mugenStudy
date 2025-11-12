@@ -15,6 +15,7 @@ extension MainRoute {
                 .toolbar(.hidden, for: .tabBar)
         case .vocabRange(let type, let range):
             VocabRangeView(type: type, rangeLabel: range)
+                .toolbar(.hidden, for: .tabBar)
         case .vocabSession(let words, let range):
             VocabSessionView(words: words, range: range)
         }

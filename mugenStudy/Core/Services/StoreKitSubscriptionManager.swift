@@ -6,7 +6,7 @@ internal import Combine
 final class StoreKitSubscriptionManager: ObservableObject {
     static let shared = StoreKitSubscriptionManager()
     
-    private let productIds: Set<String> = ["mutenStudyAPP.plus"]
+    private let productIds: Set<String> = ["mutenStudy.subscription.plus"]
     
     @Published var products: [Product] = []
     @Published var isSubscribed: Bool = false
