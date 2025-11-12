@@ -13,8 +13,20 @@ struct ToeicVocabularyMenuView: View {
     ]
     
     var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("MUGEN STUDY")
+                .font(.system(size: 50, weight: .black, design: .default))
+                .bold()
+                .padding(.bottom, -15)
+            
+            Text("AI-powered question generation app")
+                .font(.system(.body, design: .serif))
+                .bold()
+                .padding(.bottom, 16)
+        }
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                
                 VocabSeriesCardView(
                     levelText: "初級",
                     titleText: "Beginner 1000",
@@ -36,8 +48,8 @@ struct ToeicVocabularyMenuView: View {
                 )
             }
         }
-        .padding()
-        .navigationTitle("Vocabulary Questions")
+        .padding(.horizontal, 16)
+//        .navigationTitle("Vocabulary Questions")
     }
 }
 

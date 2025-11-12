@@ -27,7 +27,7 @@ struct ToeicMainView: View {
     
     var body: some View {
         NavigationStack(path: $path) {
-            menues
+            ToeicVocabularyMenuView()
             .navigationDestination(for: MainRoute.self) { $0.destination }
         }
     }
