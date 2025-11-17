@@ -3,11 +3,11 @@ import GoogleMobileAds
 import StoreKit
 
 struct VocabRangeView: View {
-    @StateObject private var vm: VocabRangeViewModel
-    @State private var isHeaderExpanded: Bool = false
-    @StateObject private var adManager = InterstitialAdManager(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GAD_AT_CREATE_TOEIC5") as? String)
-    @State private var hostViewController: UIViewController? = nil
     @ObservedObject private var subscriptionManager = StoreKitSubscriptionManager.shared
+    @StateObject private var vm: VocabRangeViewModel
+    @StateObject private var adManager = InterstitialAdManager(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GAD_AT_CREATE_TOEIC5") as? String)
+    @State private var isHeaderExpanded: Bool = false
+    @State private var hostViewController: UIViewController? = nil
     @State private var showSubscriptionAlert: Bool = false
 
     init(type: NgslWordCategory, rangeLabel: VocabRange) {

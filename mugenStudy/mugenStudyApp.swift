@@ -47,7 +47,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct MugenStudyApp: SwiftUI.App {
-    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @AppStorage("isDarkMode") private var isDarkMode: Bool = false
     
     var body: some Scene {
@@ -62,6 +62,9 @@ struct MugenStudyApp: SwiftUI.App {
                         Label("設定", systemImage: "gearshape")
                     }
             }
+            BannerAdView(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GGAD_AT_HOME_BOTTOM_BANNER") as? String)
+                .frame(height: 50)
+                .background(Color.clear)
             .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }

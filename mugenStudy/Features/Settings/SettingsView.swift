@@ -41,7 +41,7 @@ struct SettingsView: View {
                             Button {
                                 showPaywall = true
                             } label: {
-                                Label("プランを管理（モック）", systemImage: "wand.and.stars")
+                                Label("プランを管理", systemImage: "wand.and.stars")
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
                             .buttonStyle(.bordered)
@@ -131,7 +131,7 @@ private struct PaywallView: View {
                 
                 VStack(alignment: .leading, spacing: 10) {
                     Label("機能制限解除", systemImage: "sparkles")
-                    Label("広告が表示されません", systemImage: "nosign")
+                    Label("広告が表示されません（開発中）", systemImage: "nosign")
                     Label("分析機能も開発中", systemImage: "sparkles")
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -183,6 +183,7 @@ private struct PaywallView: View {
                                 .padding(.vertical, 14)
                             }
                         }
+                        .frame(maxHeight: 50)
                         .buttonStyle(.plain)
                         .padding(.horizontal)
                     } else {
