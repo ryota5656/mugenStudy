@@ -1,5 +1,27 @@
 import SwiftUI
 import StoreKit
+import UIKit
+
+// MARK: - Subscription Management launcher (file-private, reusable)
+fileprivate func openManageSubscriptionsGlobal() {
+    if let scene = UIApplication.shared.connectedScenes
+        .compactMap({ $0 as? UIWindowScene })
+        .first {
+        Task {
+            do {
+                try await AppStore.showManageSubscriptions(in: scene)
+            } catch {
+                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                    await UIApplication.shared.open(url)
+                }
+            }
+        }
+    } else if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+        Task {
+            await UIApplication.shared.open(url)
+        }
+    }
+}
 
 struct SettingsView: View {
     @AppStorage("isSubscribed") private var isSubscribed: Bool = false
@@ -39,7 +61,7 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                         if isSubscribed {
                             Button {
-                                showPaywall = true
+                                openManageSubscriptionsGlobal()
                             } label: {
                                 Label("プランを管理", systemImage: "wand.and.stars")
                                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -80,9 +102,6 @@ struct SettingsView: View {
                                             Text("サブスクリプションに加入")
                                                 .font(.headline.bold())
                                                 .foregroundStyle(.white)
-                                            Text("7日間無料トライアル")
-                                                .font(.caption)
-                                                .foregroundStyle(.white.opacity(0.9))
                                         }
                                         Spacer(minLength: 0)
                                         Image(systemName: "arrow.right")
@@ -101,6 +120,33 @@ struct SettingsView: View {
                     }
                     .padding(.vertical, 6)
                 }
+            
+            // App Review 対応: サブスク表示義務（タイトル/期間/価格/単価）
+            Section(header: Text("サブスクリプションの詳細")) {
+                if let product = skManager.products.first {
+                    LabeledContent("タイトル", value: product.displayName)
+                    LabeledContent("期間", value: subscriptionPeriodText(product))
+                    LabeledContent("価格", value: product.displayPrice)
+                    if let unitPrice = unitPricePerMonthText(product) {
+                        LabeledContent("単価換算", value: unitPrice)
+                    }
+                } else {
+                    HStack {
+                        ProgressView().scaleEffect(0.8)
+                        Text("価格情報を読み込み中…").foregroundStyle(.secondary)
+                    }
+                    .task { await skManager.loadProducts() }
+                }
+            }
+            
+            // App Review 対応: プライバシーポリシー / 利用規約 へのリンク
+            Section(header: Text("ポリシー")) {
+                if let privacyURL = URL(string: "https://note.com/quirky_magpie934/n/nf837a51b90bc"),
+                   let termsURL = URL(string: "https://note.com/quirky_magpie934/n/nd429b96dc394") {
+                    Link("プライバシーポリシー", destination: privacyURL)
+                    Link("利用規約（EULA）", destination: termsURL)
+                }
+            }
                 
             }
             .navigationTitle("設定")
@@ -109,6 +155,38 @@ struct SettingsView: View {
             PaywallView(isSubscribed: $isSubscribed)
                 .environmentObject(skManager)
         }
+    }
+}
+
+// MARK: - Helpers
+private extension SettingsView {
+    func subscriptionPeriodText(_ product: Product) -> String {
+        guard let p = product.subscription?.subscriptionPeriod else { return "-" }
+        let unit: String
+        switch p.unit {
+        case .day: unit = "日"
+        case .week: unit = "週"
+        case .month: unit = "か月"
+        case .year: unit = "年"
+        @unknown default: unit = ""
+        }
+        return "\(p.value)\(unit)"
+    }
+    
+    func unitPricePerMonthText(_ product: Product) -> String? {
+        guard let p = product.subscription?.subscriptionPeriod else { return nil }
+        // 年額または複数月のプランを月額換算で表示
+        var divisor: Int?
+        switch p.unit {
+        case .year: divisor = 12
+        case .month where p.value > 1: divisor = p.value
+        default: divisor = nil
+        }
+        guard let d = divisor, d > 0 else { return nil }
+        let total = NSDecimalNumber(decimal: product.price)
+        let per = total.dividing(by: NSDecimalNumber(value: d)).decimalValue
+        let formatted = per.formatted(product.priceFormatStyle)
+        return "\(formatted) / 月"
     }
 }
 
@@ -214,6 +292,15 @@ private struct PaywallView: View {
                 .buttonStyle(.bordered)
                 .padding(.horizontal)
                 
+                // サブスク解約/管理（App Storeの管理画面へ）
+                Button {
+                    openManageSubscriptionsGlobal()
+                } label: {
+                    Text("サブスクリプションを管理（解約）").frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .padding(.horizontal)
+                
                 Button {
                     dismiss()
                 } label: {
@@ -239,5 +326,3 @@ private struct PaywallView: View {
 #Preview {
     SettingsView()
 }
-
-
