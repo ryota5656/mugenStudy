@@ -72,19 +72,19 @@ extension VocabRangeView {
                     HStack(spacing: 8) {
                         Image(systemName: "star")
                             .foregroundStyle(.blue)
-                        if subscriptionManager.isSubscribed {
+//                        if subscriptionManager.isSubscribed {
                             Toggle("", isOn: $vm.showFavoritesOnly)
                                 .labelsHidden()
-                        } else {
-                            // 非会員は無効化＋タップで案内
-                            HStack(spacing: 6) {
-                                Toggle("", isOn: .constant(false))
-                                    .labelsHidden()
-                                    .disabled(true)
-                            }
-                            .contentShape(Rectangle())
-                            .onTapGesture { showSubscriptionAlert = true }
-                        }
+//                        } else {
+//                            // 非会員は無効化＋タップで案内
+//                            HStack(spacing: 6) {
+//                                Toggle("", isOn: .constant(false))
+//                                    .labelsHidden()
+//                                    .disabled(true)
+//                            }
+//                            .contentShape(Rectangle())
+//                            .onTapGesture { showSubscriptionAlert = true }
+//                        }
                     }
                 
                     HStack(spacing: 8) {
