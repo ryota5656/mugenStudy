@@ -62,7 +62,7 @@ struct MugenStudyApp: SwiftUI.App {
                         Label("設定", systemImage: "gearshape")
                     }
             }
-            BannerAdView(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GGAD_AT_HOME_BOTTOM_BANNER") as? String)
+            BannerAdView(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GAD_AT_HOME_BOTTOM_BANNER") as? String)
                 .frame(height: 50)
                 .background(Color.clear)
             .preferredColorScheme(isDarkMode ? .dark : .light)
