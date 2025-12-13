@@ -191,14 +191,15 @@ class VocabRangeViewModel: ObservableObject {
     
     // 画面からの開始通知でフラグ更新
     func onStartButtonTapped() {
-        sideEffects.send(.showInterstitial)
-    }
-}
-
-extension VocabRangeViewModel: InterstitialAdManagerDelegate {
-    func interstitialAdDidDismiss() {
-        print("😃：広告が閉じられました！")
+//        sideEffects.send(.showInterstitial)
         shouldNavigateToSession = true
     }
 }
+
+//extension VocabRangeViewModel: InterstitialAdManagerDelegate {
+//    func interstitialAdDidDismiss() {
+//        print("😃：広告が閉じられました！")
+//        shouldNavigateToSession = true
+//    }
+//}
 

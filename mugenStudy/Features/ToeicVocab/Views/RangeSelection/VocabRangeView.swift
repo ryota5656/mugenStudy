@@ -5,7 +5,8 @@ import StoreKit
 struct VocabRangeView: View {
     @ObservedObject private var subscriptionManager = StoreKitSubscriptionManager.shared
     @StateObject private var vm: VocabRangeViewModel
-    @StateObject private var adManager = InterstitialAdManager(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GAD_AT_CREATE_TOEIC5") as? String)
+    //インステ広告の削除
+//    @StateObject private var adManager = InterstitialAdManager(adUnitID: Bundle.main.object(forInfoDictionaryKey: "GAD_AT_CREATE_TOEIC5") as? String)
     @State private var isHeaderExpanded: Bool = false
     @State private var hostViewController: UIViewController? = nil
     @State private var showSubscriptionAlert: Bool = false
@@ -25,7 +26,7 @@ struct VocabRangeView: View {
         .navigationTitle("Vocabulary Questions")
         .task {
             await vm.ensureInitialized()
-            adManager.delegate = vm
+//            adManager.delegate = vm
         }
         .background(
             HostControllerReader { vc in
@@ -40,14 +41,14 @@ struct VocabRangeView: View {
         }
         .onChange(of: vm.shouldNavigateToSession) { isActive in
             if !isActive {
-                adManager.reload()
+//                adManager.reload()
             }
         }
         .onReceive(vm.sideEffects) { eff in
             switch eff {
             case .showInterstitial:
                 if let vc = hostViewController {
-                    adManager.presentWhenReady(from: vc, timeout: 10)
+//                    adManager.presentWhenReady(from: vc, timeout: 10)
                 }
             }
         }
